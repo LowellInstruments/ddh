@@ -250,12 +250,12 @@ def gps_utils_boot_wait_first():
         _u(f"{STATE_DDS_NOTIFY_GPS_BOOT}/{t_left}")
         g = gps_measure()
         if g:
-            lg.a(f"gps_boot_wait_first g = {str(g)}")
+            lg.a(f"boot: wait GPS first frame g = {str(g)}")
             return g
         lg.a(f"{t_left} seconds remaining GPS at boot")
         time.sleep(1)
 
-    lg.a("warning: gps_boot_wait_first did not get GPS lock")
+    lg.a("warning: gps_boot_wait_first did NOT get GPS lock")
     return "", "", None, 0
 
 

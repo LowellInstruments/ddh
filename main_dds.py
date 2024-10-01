@@ -134,6 +134,7 @@ def main_dds():
             if gps_utils_clock_sync_if_so(tg):
                 notify_boot(g)
                 break
+        # todo: test this by setting cold-boot GPS time to 10 seconds
         ne_gps_boot += 1
         print('n_fail_gps_at_boot =', ne_gps_boot)
         if ne_gps_boot == 100:
