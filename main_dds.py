@@ -125,7 +125,7 @@ def main_dds():
     gps_utils_boot_wait_first()
 
     # do nothing if we never had a GPS clock sync
-    ne_gps_boot = 0
+    nge_b = 0
     gps_utils_banner_clock_sync_at_boot()
     while not gps_utils_did_we_ever_clock_sync():
         g = gps_measure()
@@ -134,12 +134,12 @@ def main_dds():
             if gps_utils_clock_sync_if_so(tg):
                 notify_boot(g)
                 break
-        # todo: test this by setting cold-boot GPS time to 10 seconds
-        ne_gps_boot += 1
-        print('n_fail_gps_at_boot =', ne_gps_boot)
-        if ne_gps_boot == 100:
-            ne_gps_boot = 0
+        # nge_b: number gps errors at boot, approx 1 per second
+        nge_b += 1
+        if nge_b == 300:
+            nge_b = 0
             notify_error_gps_clock_sync()
+            sqs_serve(boot=True)
 
     # -------------------------------------------------------------------
     # select BLE antenna, do here to have time to get up from run_dds.sh

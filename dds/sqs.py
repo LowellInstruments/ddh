@@ -49,7 +49,7 @@ def dds_create_folder_sqs():
     os.makedirs(r, exist_ok=True)
 
 
-def sqs_serve():
+def sqs_serve(boot=False):
 
     # this runs from time to time, not always
     if not is_it_time_to("sqs_serve", 600):
@@ -69,8 +69,12 @@ def sqs_serve():
     # ---------------------------------
     fol = get_ddh_folder_path_sqs()
     files = glob.glob(f"{fol}/*.sqs")
+
     if files:
-        lg.a(f"serving {len(files)} SQS files")
+        if not boot:
+            lg.a(f"serving {len(files)} SQS files")
+        else:
+            lg.a(f"boot: serving {len(files)} SQS files")
 
     for i_f in files:
 
