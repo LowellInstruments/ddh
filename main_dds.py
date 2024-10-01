@@ -39,7 +39,7 @@ from dds.notifications_v2 import (
     notify_boot,
     notify_error_sw_crash,
     notify_ddh_needs_sw_update,
-    notify_ddh_alive)
+    notify_ddh_alive, notify_error_gps_clock_sync)
 from dds.sqs import (
     dds_create_folder_sqs,
     sqs_serve,
@@ -125,6 +125,7 @@ def main_dds():
     gps_utils_boot_wait_first()
 
     # do nothing if we never had a GPS clock sync
+    ne_gps_boot = 0
     gps_utils_banner_clock_sync_at_boot()
     while not gps_utils_did_we_ever_clock_sync():
         g = gps_measure()
@@ -133,6 +134,11 @@ def main_dds():
             if gps_utils_clock_sync_if_so(tg):
                 notify_boot(g)
                 break
+        ne_gps_boot += 1
+        print('n_fail_gps_at_boot =', ne_gps_boot)
+        if ne_gps_boot == 100:
+            ne_gps_boot = 0
+            notify_error_gps_clock_sync()
 
     # -------------------------------------------------------------------
     # select BLE antenna, do here to have time to get up from run_dds.sh
