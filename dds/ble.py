@@ -16,7 +16,7 @@ from dds.ble_dl_moana import ble_interact_moana
 from dds.ble_dl_rn4020 import ble_interact_rn4020
 from dds.ble_dl_tdo import ble_interact_tdo
 from dds.ble_dl_tdo_lsb import ble_interact_tdo_lsb
-from dds.gps import gps_log_position_logger, gps_simulate_boat_speed
+from dds.gps_utils import gps_simulate_boat_speed, gps_utils_tell_position_logger
 from dds.in_ports_geo import dds_ask_in_port_to_ddn
 from dds.macs import (
     rm_mac_black,
@@ -384,7 +384,7 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
             continue
 
         # show the position of the logger we will download
-        gps_log_position_logger(g)
+        gps_utils_tell_position_logger(g)
 
         # work with ONE logger of the scanned ones
         return await _ble_interact_one_logger(mac, model, _h, g)
