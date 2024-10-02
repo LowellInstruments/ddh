@@ -124,7 +124,7 @@ def main_dds():
     gps_know_hat_firmware_version()
     gps_utils_boot_wait_first()
 
-    # do nothing if we never had a GPS clock sync
+    # remain here as long as no GPS clock sync at boot
     nge_b = 0
     gps_utils_banner_clock_sync_at_boot()
     while not gps_utils_did_we_ever_clock_sync():
@@ -135,11 +135,11 @@ def main_dds():
                 notify_boot(g)
                 break
         # nge_b: number gps errors at boot, approx 1 per second
-        nge_b += 1
-        if nge_b == 300:
-            nge_b = 0
+        if nge_b % 300 == 0:
+            lg.a('error: cannot GPS sync at boot, sending notification')
             notify_error_gps_clock_sync()
             sqs_serve(boot=True)
+        nge_b += 1
 
     # -------------------------------------------------------------------
     # select BLE antenna, do here to have time to get up from run_dds.sh
