@@ -134,3 +134,7 @@
 
     done better CST, less logs
 
+4.0.XX - October 2, 2024
+
+    big GPS refactor, easier and better
+
