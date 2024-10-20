@@ -27,6 +27,12 @@ CTT_API_ER = 'error'
 DDH_API_VERSION = "1.0.03"
 
 
+def api_linux_is_process_running(name) -> bool:
+    cmd = 'ps -aux | grep {} | grep -v grep'.format(name)
+    rv = sp.run(cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+    return rv.returncode == 0
+
+
 def api_get_api_version():
     return DDH_API_VERSION
 
