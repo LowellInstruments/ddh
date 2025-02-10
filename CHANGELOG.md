@@ -306,3 +306,8 @@
 4.0.69 February 7, 2025
 
     Minimized SQS notifications around the port
+
+4.0.70 February 10, 2025
+
+    optimized logs size by removing some repeated lines in graphs size
+
