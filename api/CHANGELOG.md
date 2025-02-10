@@ -21,3 +21,7 @@
 
     api_get_api_version() based on .api_version file
     /info endpoint now returns free disk space
+
+1.0.07 - February 10, 2025
+
+    ep_history we added a "since" parameter
