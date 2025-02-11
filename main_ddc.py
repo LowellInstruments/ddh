@@ -385,15 +385,17 @@ def cb_ddh_show_help():
     _p('GPS dummy    -> GPS is simulated, it uses position in config.toml')
     _p('GPS USB puck -> GPS source is a GPS USB puck, not a RPi shield')
     _p('crontab      -> automatically starts or not DDH app upon boot')
-    _p('kill DDH     -> forces DDH app to quit')
+    # _p('kill DDH     -> forces DDH app to quit')
     _p('graph demo   -> the DDH plotting tab will use simulated data')
     _p('credentials  -> checks the DDH has all the passwords to run OK')
     _p('GPS shield   -> tests the GPS shield, not the GPS USB puck')
     _p('side buttons -> tests the DDH real side buttons to be working')
     _p('BLE range    -> tests how well a logger\'s signal reaches the DDH')
-    _p('MAC range    -> sets the MAC address used in BLE range')
     _p('deploy DOX   -> prepares a DO-1 or DO-2 logger for deployment')
     _p('deploy TDO   -> prepares a TDO logger for deployment')
+    _p('detect LI    -> detects BLE Lowell Instruments loggers around')
+    _p('cell quality -> tests how good cell reception is')
+    _p('GPS quality  -> tests how good GPS reception is')
     # _p('calibrate    -> tunes the DDH touch display')
     _p('see issues   -> check any potential DDH conflict or misconfiguration')
     input()
@@ -431,7 +433,7 @@ def main_ddc():
             '1': (f"1) set GPS dummy     [{fgd}]", cb_gps_dummy),
             '2': (f"2) set GPS USB puck  [{fge}]", cb_gps_external),
             '3': (f"3) set crontab       [{fcd}]", cb_crontab_ddh),
-            '4': (f"4) kill DDH app      [{fdr}]", cb_kill_ddh),
+            #'4': (f"4) kill DDH app      [{fdr}]", cb_kill_ddh),
             '5': (f"5) set graph demo    [{fgt}]", cb_graph_demo),
             '6': (f"6) check all keys    [{fdk}]", cb_print_check_all_keys),
             '7': (f"7) test GPS shield", cb_test_gps_quectel),
@@ -442,7 +444,7 @@ def main_ddc():
             'o': (f"o) deploy logger DOX", cb_run_deploy_dox),
             't': (f"t) deploy logger TDO", cb_run_deploy_tdo),
             'b': (f"b) detect LI loggers around", cb_run_scan_li),
-            'u': (f"u) list Quectel USB ports", cb_list_quectel_usb_ports),
+            #'u': (f"u) list Quectel USB ports", cb_list_quectel_usb_ports),
             's': (f"s) get cell signal quality (beta)", cb_get_csq),
             'g': (f"g) get GPS  signal quality (beta)", cb_get_gsq),
             'i': (f"i) ~ see issues ~", cb_ddh_show_issues),
@@ -481,6 +483,8 @@ def main_ddc():
                 cb_edit_ddh_config_file()
             elif c == 'c':
                 cb_calibrate_display()
+            elif c == 'u':
+                cb_list_quectel_usb_ports()
             else:
                 _, cb = d[c]
                 cb()

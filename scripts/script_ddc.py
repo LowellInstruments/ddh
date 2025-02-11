@@ -13,7 +13,7 @@ from scripts.script_provision_get import (
     ping_provision_server
 )
 from utils.ddh_config import cfg_load_from_file, cfg_save_to_file
-from utils.ddh_shared import get_ddh_folder_path_settings
+from utils.ddh_shared import get_ddh_folder_path_settings, get_ddh_local_sw_version
 from utils.find_usb_port_auto import find_n_list_all_usb_port_automatically
 from utils.flag_paths import (
     LI_PATH_GROUPED_S3_FILE_FLAG,
@@ -271,6 +271,34 @@ def ddh_run_check():
         global str_w
         str_w += f'   - {s}\n'
 
+    def _check_version_ddh():
+        vl = get_ddh_local_sw_version()
+
+        # get DDH version from github
+        repo = 'https://raw.githubusercontent.com/LowellInstruments/ddh/toml'
+        s = '.ddh_version'
+        c = f'timeout 2 wget {repo}/{s}'
+        c += f' -O /tmp/{s}'
+        rv = sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+        if rv.returncode:
+            _e('cannot obtain github remote DDH version')
+            # 0 is bad
+            return 0
+
+        # we sure we have version here
+        with open(f'/tmp/{s}', 'r') as f:
+            vg = f.readline().replace('\n', '')
+
+        if vl[0] != vg[0]:
+            _w(f'DDH major version mismatch, local {vl}, github {vg}')
+        elif vl[2] != vg[2]:
+            _w(f'DDH minor version mismatch, local {vl}, github {vg}')
+        elif vl[4] != vg[4]:
+            _i(f'DDH patch version mismatch, local {vl}, github {vg}')
+        elif vl[5] != vg[5]:
+            _i(f'DDH patch version mismatch, local {vl}, github {vg}')
+        return 1
+
     def _check_fw_cell():
         ls = find_n_list_all_usb_port_automatically(VP_QUECTEL)
         # ls: ['/dev/ttyUSB3', '/dev/ttyUSB2', '/dev/ttyUSB1, '/dev/ttyUSB0']
@@ -357,6 +385,12 @@ def ddh_run_check():
     flag_mod_btuart = sh(f'md5sum /usr/bin/btuart | grep {MD5_MOD_BTUART}') == 0
     ok_ble_v = sh('bluetoothctl -v | grep 5.66') == 0
     _c = 'systemctl is-active unit_switch_net.service | grep -w active'
+
+    ts = time.perf_counter()
+    ok_check_ddh_version = _check_version_ddh() == 0
+    if DEBUG_TIME:
+        el_ts = time.perf_counter() - ts
+        print(f'_check_version_ddh took {int(el_ts)}')
 
     ts = time.perf_counter()
     ok_service_cell_sw = sh(_c) == 0

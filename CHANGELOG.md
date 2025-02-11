@@ -311,3 +311,6 @@
 
     optimized logs size by removing some repeated lines in graphs size
 
+4.0.71 February 11, 2025
+
+    now DDC checks local DDH version vs github's one
