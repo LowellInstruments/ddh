@@ -237,7 +237,9 @@ def aws_sync(yyyy=datetime.datetime.utcnow().year):
         return
 
     if ddh_get_internet_via() == 'none':
-        lg.a('error: no AWS sync attempt because no internet access')
+        if is_it_time_to('tell_no_aws_sync_because_no_internet', 300):
+            lg.a('error: no AWS sync attempt because no internet access')
+        _u(STATE_DDS_NOTIFY_CLOUD_ERR)
         return
 
     # detect we are doing last year sync
@@ -359,6 +361,7 @@ def aws_cp():
 
     if ddh_get_internet_via() == 'none':
         lg.a('error: no AWS copy, no internet access')
+        _u(STATE_DDS_NOTIFY_CLOUD_ERR)
         return
 
     # not doing it, not very interesting
@@ -376,6 +379,7 @@ def aws_cp():
         return
     if linux_is_process_running(AWS_S3_CP_PROC_NAME):
         lg.a('warning: no AWS copy, last AWS cp took long time')
+        _u(STATE_DDS_NOTIFY_CLOUD_ERR)
         return
 
     # run as a different process for smoother GUI
