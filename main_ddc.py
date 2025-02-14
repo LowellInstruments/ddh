@@ -181,10 +181,12 @@ def cb_get_gsq():
     os.system('clear')
     print('GPS quality test, running')
     ser = serial.Serial(p_gps, 115200, timeout=.1)
-    till_run = time.perf_counter() + 30
 
+    # starts GPS signal quality loop
+    till_run = time.perf_counter() + 30
     dt = {}
-    while time.perf_counter() < till_run:
+    # while time.perf_counter() < till_run:
+    while 1:
         bb = bytes()
         we_have_line = 0
         till_read = time.perf_counter() + 2

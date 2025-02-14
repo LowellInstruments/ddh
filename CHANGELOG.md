@@ -320,3 +320,6 @@
     added DDC capability to detect ppp0 interfaces
     added DDC capatility to detect sixfab software running
     improved DDC explanation strings
+    made DDC GPS signal quality test infinite
+
+4.0.73 February 15, 2025
