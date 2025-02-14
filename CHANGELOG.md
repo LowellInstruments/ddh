@@ -314,3 +314,9 @@
 4.0.71 February 11, 2025
 
     now DDC checks local DDH version vs github's one
+
+4.0.72 February 14, 2025
+
+    added DDC capability to detect ppp0 interfaces
+    added DDC capatility to detect sixfab software running
+    improved DDC explanation strings

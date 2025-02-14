@@ -472,7 +472,7 @@ def main_ddc():
         try:
             os.system('clear')
             print(f'you selected:\n\t{d[c][0]}')
-            time.sleep(1)
+            time.sleep(.5)
 
             # -----------------
             # hidden options
