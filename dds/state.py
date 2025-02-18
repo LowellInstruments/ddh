@@ -8,32 +8,32 @@ import toml
 FILE_SAVED_PREFERENCES = f'{get_ddh_folder_path_tweak()}/.saved_preferences.toml'
 
 
-def _check_preferences_file_exists():
-    if not os.path.exists(FILE_SAVED_PREFERENCES):
-        lg.a('set brightness value 255 (100% = clicks 9) to preferences file')
-        state_save_brightness_clicks(9)
-        lg.a('set models index value 0 to preferences file')
-        state_save_models_index(0)
-
-
 def state_get_saved_brightness_clicks():
     if not linux_is_rpi():
         return
-    _check_preferences_file_exists()
-    with open(FILE_SAVED_PREFERENCES, 'r') as f:
-        d = toml.load(f)
-        v = d['brightness']
-        lg.a(f'read saved brightness clicks = {v} from preferences file')
-        return v
+    try:
+        with open(FILE_SAVED_PREFERENCES, 'r') as f:
+            d = toml.load(f)
+            v = d['brightness']
+            lg.a(f'read saved brightness clicks = {v} from preferences file')
+            return v
+    except (Exception, ) as ex:
+        lg.a(f'warning: state_get_saved_brightness_clicks -> {ex}')
+        state_save_brightness_clicks(9)
+        return 9
 
 
 def state_get_saved_models_index():
-    _check_preferences_file_exists()
-    with open(FILE_SAVED_PREFERENCES, 'r') as f:
-        d = toml.load(f)
-        v = d['models_idx']
-        lg.a(f'read saved models index = {v} from preferences file')
-        return v
+    try:
+        with open(FILE_SAVED_PREFERENCES, 'r') as f:
+            d = toml.load(f)
+            v = d['models_idx']
+            lg.a(f'read saved models index = {v} from preferences file')
+            return v
+    except (Exception, ) as ex:
+        lg.a(f'warning: state_get_saved_models_index -> {ex}')
+        state_save_models_index(0)
+        return 0
 
 
 def state_save_brightness_clicks(v):

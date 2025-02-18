@@ -69,15 +69,17 @@ def _th_gpio_box_buttons():
     pause()
 
 
+def b1_cb(_):
+    _u(STATE_DDS_PRESSED_BUTTON_1)
+
+def b2_cb(_):
+    _u(STATE_DDS_PRESSED_BUTTON_2)
+
+def b3_cb(_):
+    pass
+
+
 def _th_gpio_box_buttons_new():
-    def b1_cb(_):
-        _u(STATE_DDS_PRESSED_BUTTON_1)
-
-    def b2_cb(_):
-        _u(STATE_DDS_PRESSED_BUTTON_2)
-
-    def b3_cb(_):
-        pass
 
     GPIO.setwarnings(False)
     # use physical pin numbering
