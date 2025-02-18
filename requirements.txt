@@ -17,3 +17,8 @@ py_cui~=0.1.6
 pyserial~=3.5b0
 simplepyble~=0.7.3
 lsb@git+https://github.com/LowellInstruments/lsb.git
+
+# when developing on Desktop
+# PyQt5~=5.15
+# PyQtWebEngine~=5.15
+# psutil~=7.0
