@@ -293,8 +293,9 @@ def _graph_process_n_draw(a, r=''):
         fol = str(get_dl_folder_path_from_mac(mac))
 
     # get number of hauls
+    bn_fol = fol.split('/')[-1]
     nh = get_total_number_of_hauls(fol)
-    lg.a(f'found {nh} total hauls in folder {fol}')
+    lg.a(f'found {nh} total hauls in dl_files/{bn_fol}')
     if nh == 0:
         raise GraphException(f'error: no hauls for {fol}')
 

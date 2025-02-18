@@ -237,7 +237,9 @@ def aws_sync(yyyy=datetime.datetime.utcnow().year):
         return
 
     if ddh_get_internet_via() == 'none':
-        lg.a('error: no AWS sync attempt because no internet access')
+        if is_it_time_to('tell_no_aws_sync_because_no_internet', 300):
+            lg.a('error: no AWS sync attempt because no internet access')
+        _u(STATE_DDS_NOTIFY_CLOUD_ERR)
         return
 
     # detect we are doing last year sync
@@ -359,6 +361,7 @@ def aws_cp():
 
     if ddh_get_internet_via() == 'none':
         lg.a('error: no AWS copy, no internet access')
+        _u(STATE_DDS_NOTIFY_CLOUD_ERR)
         return
 
     # not doing it, not very interesting
@@ -376,6 +379,7 @@ def aws_cp():
         return
     if linux_is_process_running(AWS_S3_CP_PROC_NAME):
         lg.a('warning: no AWS copy, last AWS cp took long time')
+        _u(STATE_DDS_NOTIFY_CLOUD_ERR)
         return
 
     # run as a different process for smoother GUI
@@ -391,8 +395,6 @@ def aws_sync_or_cp():
     k = 'run_aws_cp'
     flag_gui = dds_get_aws_has_something_to_do_via_gui_flag_file()
     flag_dl = dds_get_flag_file_some_ble_dl()
-    exists_flag_gui = os.path.exists(flag_gui)
-    exists_flag_dl = os.path.exists(flag_dl)
     global g_aws_sync_at_boot
     global g_aws_sync_for_last_year
 
@@ -412,9 +414,9 @@ def aws_sync_or_cp():
             os.unlink(PATH_AWS_CP_DB)
 
         # clear flags because what we are doing contains them
-        if exists_flag_gui:
+        if os.path.exists(flag_gui):
             os.unlink(flag_gui)
-        if exists_flag_dl:
+        if os.path.exists(flag_dl):
             os.unlink(flag_dl)
 
         # sync and rebuild AWS-cp database assuming went OK
@@ -437,14 +439,12 @@ def aws_sync_or_cp():
             lg.a('warning: detected existing S3 last year flag, skipping it')
 
     # try to sync when user creates GUI flag by clicking cloud-icon
-    if exists_flag_gui:
+    if os.path.exists(flag_gui):
         lg.a("doing S3 sync requested by GUI")
         os.unlink(flag_gui)
 
         # we will try enough
-        if exists_flag_gui:
-            os.unlink(flag_gui)
-        if exists_flag_dl:
+        if os.path.exists(flag_dl):
             os.unlink(flag_dl)
 
         # sync and rebuild database assuming went ok
@@ -454,7 +454,7 @@ def aws_sync_or_cp():
         return
 
     # upload upon newly downloaded BLE files
-    if exists_flag_dl:
+    if os.path.exists(flag_dl):
         lg.a(f'doing S3 copy session, detected flag BLE download')
         os.unlink(flag_dl)
         aws_cp()

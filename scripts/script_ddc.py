@@ -13,7 +13,7 @@ from scripts.script_provision_get import (
     ping_provision_server
 )
 from utils.ddh_config import cfg_load_from_file, cfg_save_to_file
-from utils.ddh_shared import get_ddh_folder_path_settings
+from utils.ddh_shared import get_ddh_folder_path_settings, get_ddh_local_sw_version
 from utils.find_usb_port_auto import find_n_list_all_usb_port_automatically
 from utils.flag_paths import (
     LI_PATH_GROUPED_S3_FILE_FLAG,
@@ -271,14 +271,42 @@ def ddh_run_check():
         global str_w
         str_w += f'   - {s}\n'
 
+    def _check_version_ddh():
+        vl = get_ddh_local_sw_version()
+
+        # get DDH version from github
+        repo = 'https://raw.githubusercontent.com/LowellInstruments/ddh/toml'
+        s = '.ddh_version'
+        c = f'timeout 2 wget {repo}/{s}'
+        c += f' -O /tmp/{s}'
+        rv = sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+        if rv.returncode:
+            _e('cannot obtain github remote DDH version')
+            # 0 is bad
+            return 0
+
+        # we sure we have version here
+        with open(f'/tmp/{s}', 'r') as f:
+            vg = f.readline().replace('\n', '')
+
+        if vl[0] != vg[0]:
+            _w(f'app major version mismatch, local {vl}, github {vg}')
+        elif vl[2] != vg[2]:
+            _w(f'app minor version mismatch, local {vl}, github {vg}')
+        elif vl[4] != vg[4]:
+            _i(f'app patch version mismatch, local {vl}, github {vg}')
+        elif vl[5] != vg[5]:
+            _i(f'app patch version mismatch, local {vl}, github {vg}')
+        return 1
+
     def _check_fw_cell():
         ls = find_n_list_all_usb_port_automatically(VP_QUECTEL)
         # ls: ['/dev/ttyUSB3', '/dev/ttyUSB2', '/dev/ttyUSB1, '/dev/ttyUSB0']
         if not ls:
-            _e('detecting cell shield gave 0 entries')
+            _e('no cell USB shield detected')
             return 0
         if len(ls) != 4:
-            _e('detecting cell shield should have 4 entries')
+            _e('no cell USB shield all 4 entries detected')
             return 0
 
         version = ''
@@ -309,17 +337,17 @@ def ddh_run_check():
         for k, v in f.items():
             if not v:
                 if 'custom' not in k:
-                    _e(f'config.toml no credential {k}')
+                    _e(f'file config.toml missing credential {k}')
                     # 0 is bad
                     return 0
                 else:
-                    _w(f'config.toml no custom credential {k}')
+                    _w(f'file config.toml no {k}')
         if not check_aws_run(f):
-            _e(f'config.toml AWS credentials cannot connect')
+            _e(f'file config.toml AWS credentials cannot connect')
             return 0
         return 1
 
-    def _check_files():
+    def _check_files_network():
         path_w = '/etc/wireguard/wg0.conf'
         if is_rpi():
             c = f'sudo ls {path_w}'
@@ -327,15 +355,19 @@ def ddh_run_check():
             w = _rv.returncode == 0
         else:
             w = os.path.exists(path_w)
-        a = os.path.exists(f'/home/pi/.ssh/authorized_keys')
-        m = os.path.exists(f'{get_ddh_folder_path_settings()}/all_macs.toml')
 
         if not w:
-            _w('missing wireguard VPN conf file')
-        if not a:
-            _i('missing SSH authorized keys file')
+            _w('file wireguard VPN conf is missing')
+
+        # a = os.path.exists(f'/home/pi/.ssh/authorized_keys')
+        # if not a:
+        #   _i('file SSH authorized keys is missing')
+
+    def _check_files_all_macs_toml():
+        m = os.path.exists(f'{get_ddh_folder_path_settings()}/all_macs.toml')
         if not m:
-            _e('missing ddh/settings/all_macs.toml file')
+            _e('file all_macs.toml is missing')
+
 
     # -----------------------------------------------------
     # issue: Raspberry Pi reference 2023-05-03
@@ -359,6 +391,18 @@ def ddh_run_check():
     _c = 'systemctl is-active unit_switch_net.service | grep -w active'
 
     ts = time.perf_counter()
+    ok_aws_cred = _check_aws_credentials()
+    if DEBUG_TIME:
+        el_ts = time.perf_counter() - ts
+        print(f'ok_aws_cred took {int(el_ts)}')
+
+    ts = time.perf_counter()
+    ok_check_ddh_version = _check_version_ddh() == 1
+    if DEBUG_TIME:
+        el_ts = time.perf_counter() - ts
+        print(f'_check_version_ddh took {int(el_ts)}')
+
+    ts = time.perf_counter()
     ok_service_cell_sw = sh(_c) == 0
     if DEBUG_TIME:
         el_ts = time.perf_counter() - ts
@@ -377,18 +421,18 @@ def ddh_run_check():
         print(f'ok_sixfab_installed {int(el_ts)}')
 
     ts = time.perf_counter()
+    ok_ppp0_installed = sh('ifconfig -a | grep ppp0') == 0
+    if DEBUG_TIME:
+        el_ts = time.perf_counter() - ts
+        print(f'ok_ppp0_installed {int(el_ts)}')
+
+    ts = time.perf_counter()
     ok_internet_via_cell = sh('timeout 1 ping -c 1 -I ppp0 www.google.com -4') == 0
     if DEBUG_TIME:
         el_ts = time.perf_counter() - ts
         print(f'ok_internet_via_cell took {int(el_ts)}')
 
     ok_dwservice = sh('ps -aux | grep dwagent') == 0
-
-    ts = time.perf_counter()
-    ok_aws_cred = _check_aws_credentials()
-    if DEBUG_TIME:
-        el_ts = time.perf_counter() - ts
-        print(f'ok_aws_cred took {int(el_ts)}')
 
     ok_crontab_ddh = get_crontab('ddh') == 1
     ok_crontab_api = get_crontab('api') == 1
@@ -397,49 +441,62 @@ def ddh_run_check():
     ok_shield_sailor = cb_get_flag_sailor() == 1
 
     ts = time.perf_counter()
-    ok_keys = _check_files() == 0
+    ok_file_wireguard = _check_files_network() == 0
     if DEBUG_TIME:
         el_ts = time.perf_counter() - ts
-        print(f'ok_keys took {int(el_ts)}')
+        print(f'ok_file_wireguard took {int(el_ts)}')
+
+    ts = time.perf_counter()
+    ok_file_all_macs_toml = _check_files_all_macs_toml() == 0
+    if DEBUG_TIME:
+        el_ts = time.perf_counter() - ts
+        print(f'ok_file_all_macs_toml took {int(el_ts)}')
 
     # check conflicts
     rv = 0
-    if not ok_keys:
-        _i('not all keys OK')
+    if not ok_file_wireguard:
+        # error indicated inside other function
+        rv += 1
+    if not ok_file_all_macs_toml:
+        # error indicated inside other function
+        rv += 1
     if not ok_aws_cred:
         # error indicated inside other function
         rv += 1
-    if not ok_shield_j4h and not ok_shield_sailor:
-        _w('none of 2 supported power shields detected')
+
+    if not ok_ppp0_installed:
+        _e('no cell interface ppp0 detected')
+        rv += 1
     if not ok_sixfab_installed:
-        _e('no sixfab installed')
+        # checks for ppp_connection_manager.sh
+        _e('no cell sixfab software running')
         rv += 1
     if not ok_internet_via_cell:
-        _e('no cell internet')
-        rv += 1
-    if not ok_dwservice:
-        _e('dws not running')
+        # checks for good output on command ping
+        _e('no cell internet access via ping')
         rv += 1
     if not ok_fw_cell:
-        _w('bad fw_cell')
+        _w('no cell shield proper firmware')
     if not ok_service_cell_sw:
-        _e('not running service_cell_sw')
+        _e('service switch cell / wifi not running')
+    if not ok_dwservice:
+        _e('service DWS not running')
+        rv += 1
+
     if not ok_ble_v != '5.66':
         _e('bad bluez version')
         rv += 1
+    if is_rpi3 and not flag_mod_btuart:
+        _e(f'bad mod_uart, is_rpi3 {is_rpi3}')
+        rv += 1
+
     if not (ok_issue_20230503 or
             ok_issue_20220922 or
             ok_issue_20240315):
-        _e('bad /boot/issue.txt file')
+        _e('bad issue.txt file')
         rv += 1
     if not ok_hostname:
         _e('bad hostname')
-        rv += 1
-    if flag_gps_ext and not flag_vp_gps_puck1 and not flag_vp_gps_puck2:
-        _e('GPS puck: set but not detected')
-        rv += 1
-    if is_rpi3 and not flag_mod_btuart:
-        _e(f'is_rpi3 {is_rpi3}, bad mod_uart')
         rv += 1
     if not ok_crontab_ddh:
         _e('crontab DDH not set')
@@ -447,8 +504,16 @@ def ddh_run_check():
         _e('crontab API not set')
     if not ok_crontab_lxp:
         _e('crontab LXP not set')
+    if not ok_check_ddh_version:
+        _e('could not check DDH application version')
+
+    if flag_gps_ext and not flag_vp_gps_puck1 and not flag_vp_gps_puck2:
+        _e('GPS puck set but not detected')
+        rv += 1
     if not (flag_vp_quectel or flag_vp_gps_puck1 or flag_vp_gps_puck2):
-        _e('no hardware GPS present')
-    if not ok_shield_sailor and not ok_shield_j4h:
-        _w('no hardware power shield present')
+        _e('no GPS hardware present')
+
+    if not ok_shield_j4h and not ok_shield_sailor:
+        _e('no power shield detected')
+        rv += 1
     return rv, str_e, str_w, str_i

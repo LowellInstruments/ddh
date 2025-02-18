@@ -776,7 +776,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
-        self.tabs.setCurrentIndex(7)
+        self.tabs.setCurrentIndex(6)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -833,7 +833,7 @@ class Ui_MainWindow(object):
         self.lbl_graph_busy.setText(_translate("MainWindow", "LOADING..."))
         self.tabs.setTabText(self.tabs.indexOf(self.tab_graph), _translate("MainWindow", " Graphs"))
         self.btn_map_next.setText(_translate("MainWindow", ">"))
-        self.tabs.setTabText(self.tabs.indexOf(self.tab_map), _translate("MainWindow", "Maps"))
+        self.tabs.setTabText(self.tabs.indexOf(self.tab_map), _translate("MainWindow", " Models"))
         self.btn_trawls_prev_file.setText(_translate("MainWindow", "prev."))
         self.btn_trawls_last_file.setText(_translate("MainWindow", "last"))
         self.tabs.setTabText(self.tabs.indexOf(self.tab_trawls), _translate("MainWindow", " Trawls"))

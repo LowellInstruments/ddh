@@ -50,6 +50,7 @@ from ddh.utils_trawls import (
     get_last_trawl_of_a_logger
 )
 from dds.notifications_v2 import notify_via_sms
+from dds.state import state_get_saved_models_index, state_save_models_index
 from dds.timecache import is_it_time_to
 from mat.linux import linux_is_process_running
 from utils.ddh_config import (
@@ -672,6 +673,8 @@ class DDH(QMainWindow, d_m.Ui_MainWindow):
             m = d[self.i_good_maps]
             if not os.path.exists(m):
                 m = f"{fol}/error_maps.gif"
+            else:
+                state_save_models_index(self.i_good_maps)
         except (Exception, ) as ex:
             lg.a(f'error: when next map => {ex}')
             m = f"{fol}/error_maps.gif"

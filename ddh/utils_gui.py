@@ -20,7 +20,7 @@ from ddh.db.db_his import DbHis
 from ddh.draw_graph import graph_process_n_draw
 from ddh.utils_maps import gui_populate_maps_tab
 from dds.emolt import this_box_has_grouped_s3_uplink
-from dds.state import state_get_saved_brightness_clicks, state_save_brightness_clicks
+from dds.state import state_get_saved_brightness_clicks, state_save_brightness_clicks, state_get_saved_models_index
 from dds.timecache import is_it_time_to
 from locales.locales import _x
 from locales.strings import *
@@ -171,6 +171,7 @@ def gui_setup_create_variables(a):
     a.key_pressed = None
     # brightness 9 is index for 100%
     a.num_clicks_brightness = state_get_saved_brightness_clicks() or 9
+    a.i_good_maps = state_get_saved_models_index() or 0
     a.lbl_ble_img_filled = False
     a.boat_pressed = 0
     a.commit_pressed = 0
@@ -179,7 +180,6 @@ def gui_setup_create_variables(a):
     a.lbl_uptime_pressed = 0
     a.gif_map = None
     a.n_good_maps = 0
-    a.i_good_maps = 0
     a.map_filename = None
 
 
@@ -561,7 +561,7 @@ def gui_show_advanced_tab(ui):
 
 def gui_show_map_tab(ui):
     icon = QIcon("ddh/gui/res/icon_waves.png")
-    ui.tabs.addTab(ui.tab_map_wgt_ref, icon, " Maps")
+    ui.tabs.addTab(ui.tab_map_wgt_ref, icon, "  Models")
     p = ui.tabs.findChild(QWidget, "tab_map")
     i = ui.tabs.indexOf(p)
     ui.tabs.setCurrentIndex(i)

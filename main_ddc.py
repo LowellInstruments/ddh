@@ -170,7 +170,7 @@ def cb_get_csq():
     input()
 
 
-def cb_get_gpq():
+def cb_get_gsq():
     rv = detect_quectel_usb_ports()
     if not rv:
         _p_e('could not detect quectel USB ports for CSQ')
@@ -178,14 +178,40 @@ def cb_get_gpq():
         return
     p_gps, _ = rv
 
-    ser = serial.Serial(p_gps, 115200)
-    till = time.perf_counter()
-    while time.perf_counter() < till:
-        cc = str(ser.readline())
-        line = cc[2:][:-5]
+    os.system('clear')
+    print('GPS quality test, running')
+    ser = serial.Serial(p_gps, 115200, timeout=.1)
+
+    # starts GPS signal quality loop
+    till_run = time.perf_counter() + 30
+    dt = {}
+    # while time.perf_counter() < till_run:
+    while 1:
+        bb = bytes()
+        we_have_line = 0
+        till_read = time.perf_counter() + 2
+        while time.perf_counter() < till_read:
+            b = ser.read()
+            bb += b
+            if b == b'\n':
+                we_have_line = 1
+                break
+        if len(bb) < 20:
+            continue
+        if we_have_line == 0:
+            continue
+        line = bb.decode()
         if not line.startswith('$GPGSV'):
             continue
+
+        line = line[:line.index('*')]
         f = line.split(',')
+        tm = f[1]
+        mn = f[2]
+        sv = f[3]
+        if mn == "1":
+            os.system('clear')
+            print(f'satellites in view = {sv}')
 
         # 1    = Total number of messages of this type in this cycle
         # 2    = Message number
@@ -198,17 +224,36 @@ def cb_get_gpq():
         # 12-15= Information about third SV, same as field 4-7
         # 16-19= Information about fourth SV, same as field 4-7
 
-        # print(line)
+        d = {}
+        d[mn] = {}
+        if mn == '1':
+            dt = {}
+
         for i in range(4, 17, 4):
-         try:
-            s_id = f[i]
-            s_snr = f[i + 3]
-            if s_snr and '*' not in s_snr:
-               print(f'sat id = {s_id}, snr = {s_snr}')
-         except:
-            pass
-    if ser:
-        ser.close()
+            try:
+                s_id = f[i]
+                s_snr = f[i + 3]
+                d[mn][s_id] = s_snr
+                dt[s_id] = s_snr
+            except:
+                pass
+
+        # order final dictionary
+        dt = {k: v for k, v in sorted(dt.items(), key=lambda item: item[1], reverse=True)}
+        # print(d)
+        if mn == tm:
+            print('[ id ] snr (max 99)\n')
+            for k, v in dt.items():
+                if not v:
+                    print(f'[ {k} ] na')
+                    continue
+                n = int(v)
+                s = '#' * n
+                print(f'[ {k} ] {v} {s} ')
+            time.sleep(3)
+
+    print('GPS quality test ended, press ENTER to go back to DCC')
+    input()
 
 
 def cb_test_buttons():
@@ -342,15 +387,17 @@ def cb_ddh_show_help():
     _p('GPS dummy    -> GPS is simulated, it uses position in config.toml')
     _p('GPS USB puck -> GPS source is a GPS USB puck, not a RPi shield')
     _p('crontab      -> automatically starts or not DDH app upon boot')
-    _p('kill DDH     -> forces DDH app to quit')
+    # _p('kill DDH     -> forces DDH app to quit')
     _p('graph demo   -> the DDH plotting tab will use simulated data')
     _p('credentials  -> checks the DDH has all the passwords to run OK')
     _p('GPS shield   -> tests the GPS shield, not the GPS USB puck')
     _p('side buttons -> tests the DDH real side buttons to be working')
     _p('BLE range    -> tests how well a logger\'s signal reaches the DDH')
-    _p('MAC range    -> sets the MAC address used in BLE range')
     _p('deploy DOX   -> prepares a DO-1 or DO-2 logger for deployment')
     _p('deploy TDO   -> prepares a TDO logger for deployment')
+    _p('detect LI    -> detects BLE Lowell Instruments loggers around')
+    _p('cell quality -> tests how good cell reception is')
+    _p('GPS quality  -> tests how good GPS reception is')
     # _p('calibrate    -> tunes the DDH touch display')
     _p('see issues   -> check any potential DDH conflict or misconfiguration')
     input()
@@ -388,7 +435,7 @@ def main_ddc():
             '1': (f"1) set GPS dummy     [{fgd}]", cb_gps_dummy),
             '2': (f"2) set GPS USB puck  [{fge}]", cb_gps_external),
             '3': (f"3) set crontab       [{fcd}]", cb_crontab_ddh),
-            '4': (f"4) kill DDH app      [{fdr}]", cb_kill_ddh),
+            #'4': (f"4) kill DDH app      [{fdr}]", cb_kill_ddh),
             '5': (f"5) set graph demo    [{fgt}]", cb_graph_demo),
             '6': (f"6) check all keys    [{fdk}]", cb_print_check_all_keys),
             '7': (f"7) test GPS shield", cb_test_gps_quectel),
@@ -399,9 +446,9 @@ def main_ddc():
             'o': (f"o) deploy logger DOX", cb_run_deploy_dox),
             't': (f"t) deploy logger TDO", cb_run_deploy_tdo),
             'b': (f"b) detect LI loggers around", cb_run_scan_li),
-            'u': (f"u) list Quectel USB ports", cb_list_quectel_usb_ports),
+            #'u': (f"u) list Quectel USB ports", cb_list_quectel_usb_ports),
             's': (f"s) get cell signal quality (beta)", cb_get_csq),
-            'g': (f"g) get GPS satellite quality (beta)", cb_get_gpq),
+            'g': (f"g) get GPS  signal quality (beta)", cb_get_gsq),
             'i': (f"i) ~ see issues ~", cb_ddh_show_issues),
             'h': (f"h) help", cb_ddh_show_help),
             'q': (f"q) quit", cb_quit)
@@ -427,7 +474,7 @@ def main_ddc():
         try:
             os.system('clear')
             print(f'you selected:\n\t{d[c][0]}')
-            time.sleep(1)
+            time.sleep(.5)
 
             # -----------------
             # hidden options
@@ -438,6 +485,8 @@ def main_ddc():
                 cb_edit_ddh_config_file()
             elif c == 'c':
                 cb_calibrate_display()
+            elif c == 'u':
+                cb_list_quectel_usb_ports()
             else:
                 _, cb = d[c]
                 cb()

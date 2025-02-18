@@ -112,16 +112,33 @@ async def ep_monitored_macs():
     return d
 
 
+# @app.get('/history')
+# async def ep_history():
+#     # p: path relative to this current file
+#     p = 'ddh/db/db_his.json'
+#     db = DbHis(p)
+#     r = db.get_all()
+#     try:
+#         return {"history": CTT_API_OK, "entries": r}
+#     except (Exception, ):
+#         return {"history": CTT_API_ER, "entries": {}}
+
+
 @app.get('/history')
-async def ep_history():
+async def ep_history(since=None):
     # p: path relative to this current file
+    # since: epoch seconds (p.e. 1727900000)
     p = 'ddh/db/db_his.json'
     db = DbHis(p)
     r = db.get_all()
     try:
-        return {"history": CTT_API_OK, "entries": r}
+        if not since:
+            return {"history": CTT_API_OK, "entries": r}
+        d = {k:v for k,v in r.items() if v['ep_utc'] >= since}
+        return {"history": CTT_API_OK, "entries": d}
     except (Exception, ):
         return {"history": CTT_API_ER, "entries": {}}
+
 
 
 ep = 'upload_conf'

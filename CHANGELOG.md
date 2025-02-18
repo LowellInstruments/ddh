@@ -291,3 +291,39 @@
     Simplified Smart-Lock-Out feature
     Simplified GPS error e-mail notifications
 
+4.0.66 February 4, 2025
+
+    Added GPS signal quality to DCC
+
+4.0.67 February 5, 2025
+
+    Fixed bug in aws_sync_or_cp() with os.path.exists()
+
+4.0.68 February 7, 2025
+
+    Improved script GPS quality test
+
+4.0.69 February 7, 2025
+
+    Minimized SQS notifications around the port
+
+4.0.70 February 10, 2025
+
+    optimized logs size by removing some repeated lines in graphs size
+
+4.0.71 February 11, 2025
+
+    now DDC checks local DDH version vs github's one
+
+4.0.72 February 14, 2025
+
+    added DDC capability to detect ppp0 interfaces
+    added DDC capatility to detect sixfab software running
+    improved DDC explanation strings
+    made DDC GPS signal quality test infinite
+
+4.0.73 February 15, 2025
+
+    changed "Maps" tab label to "Models"
+    "Models" tab selection is sticky, so it is remembered between DDH runs
+
