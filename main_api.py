@@ -134,7 +134,7 @@ async def ep_history(since=None):
     try:
         if not since:
             return {"history": CTT_API_OK, "entries": r}
-        d = {k:v for k,v in r.items() if v['ep_local'] >= since}
+        d = {k:v for k,v in r.items() if v['ep_loc'] >= since}
         return {"history": CTT_API_OK, "entries": d}
     except (Exception, ):
         return {"history": CTT_API_ER, "entries": {}}
