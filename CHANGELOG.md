@@ -327,3 +327,7 @@
     changed "Maps" tab label to "Models"
     "Models" tab selection is sticky, so it is remembered between DDH runs
 
+4.0.74 February 19, 2025
+
+    added text input to filter and add loggers by serial number on "Setup" tab
+
