@@ -4,7 +4,7 @@ import os
 import requests
 from PyQt5.QtGui import QMovie
 
-from dds.state import state_get_saved_models_index
+from ddh.preferences import preferences_get_models_index
 from mat.utils import linux_is_rpi
 from utils.ddh_shared import (
     ddh_get_folder_path_res,
@@ -103,7 +103,7 @@ def gui_populate_maps_tab(my_app):
         my_app.btn_map_next.setVisible(True)
 
     # check user preferences
-    n = state_get_saved_models_index()
+    n = preferences_get_models_index()
     if n == 0 and got_dtm:
         lg.a(f'loading model DTM preferred by user = {n}')
         fp = fg_dtm

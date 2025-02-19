@@ -18,9 +18,12 @@ from PyQt5.QtWidgets import (
 )
 from ddh.db.db_his import DbHis
 from ddh.draw_graph import graph_process_n_draw
+from ddh.preferences import (
+    preferences_get_brightness_clicks,
+    preferences_get_models_index, preferences_set_brightness_clicks
+)
 from ddh.utils_maps import gui_populate_maps_tab
 from dds.emolt import this_box_has_grouped_s3_uplink
-from dds.state import state_get_saved_brightness_clicks, state_save_brightness_clicks, state_get_saved_models_index
 from dds.timecache import is_it_time_to
 from locales.locales import _x
 from locales.strings import *
@@ -39,7 +42,9 @@ from utils.ddh_config import (
     ddh_get_cfg_maps_en,
     dds_get_cfg_flag_download_test_mode,
     dds_get_cfg_box_sn,
-    dds_get_cfg_skip_dl_in_port_en, exp_get_enable_trawls_tab, dds_get_cfg_monitored_pairs
+    dds_get_cfg_skip_dl_in_port_en,
+    exp_get_enable_trawls_tab,
+    dds_get_cfg_monitored_pairs
 )
 
 from utils.ddh_shared import (
@@ -170,8 +175,8 @@ def gui_setup_create_variables(a):
     a.tab_graph_wgt_ref = None
     a.key_pressed = None
     # brightness 9 is index for 100%
-    a.num_clicks_brightness = state_get_saved_brightness_clicks() or 9
-    a.i_good_maps = state_get_saved_models_index() or 0
+    a.num_clicks_brightness = preferences_get_brightness_clicks()
+    a.i_good_maps = preferences_get_models_index()
     a.lbl_ble_img_filled = False
     a.boat_pressed = 0
     a.commit_pressed = 0
@@ -1021,7 +1026,7 @@ def gui_ddh_set_brightness(a):
     }
     c = int(a.num_clicks_brightness)
     v = int(d[c])
-    state_save_brightness_clicks(c)
+    preferences_set_brightness_clicks(c)
     b1 = '/sys/class/backlight/rpi_backlight/brightness"'
     b2 = '/sys/class/backlight/10-0045/brightness"'
     # requires root or $ chmod 777 /sys/class.../backlight

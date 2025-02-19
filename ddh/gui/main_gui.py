@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import QMainWindow, QMessageBox
 import ddh.gui.designer_main as d_m
 from ddh.db.db_his import DbHis
 from ddh.draw_graph import graph_process_n_draw
+from ddh.preferences import preferences_set_models_index
 from ddh.utils_gui import (
     gui_hide_edit_tab,
     gui_hide_note_tab,
@@ -50,7 +51,6 @@ from ddh.utils_trawls import (
     get_last_trawl_of_a_logger
 )
 from dds.notifications_v2 import notify_via_sms
-from dds.state import state_get_saved_models_index, state_save_models_index
 from dds.timecache import is_it_time_to
 from mat.linux import linux_is_process_running
 from utils.ddh_config import (
@@ -674,7 +674,7 @@ class DDH(QMainWindow, d_m.Ui_MainWindow):
             if not os.path.exists(m):
                 m = f"{fol}/error_maps.gif"
             else:
-                state_save_models_index(self.i_good_maps)
+                preferences_set_models_index(self.i_good_maps)
         except (Exception, ) as ex:
             lg.a(f'error: when next map => {ex}')
             m = f"{fol}/error_maps.gif"

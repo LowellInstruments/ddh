@@ -1,55 +1,6 @@
 import os
-
-from mat.utils import linux_is_rpi
 from utils.logs import lg_sta as lg
 from utils.ddh_shared import get_ddh_folder_path_tweak
-import toml
-
-FILE_SAVED_PREFERENCES = f'{get_ddh_folder_path_tweak()}/.saved_preferences.toml'
-
-
-def state_get_saved_brightness_clicks():
-    if not linux_is_rpi():
-        return
-    try:
-        with open(FILE_SAVED_PREFERENCES, 'r') as f:
-            d = toml.load(f)
-            v = d['brightness']
-            lg.a(f'read saved brightness clicks = {v} from preferences file')
-            return v
-    except (Exception, ) as ex:
-        lg.a(f'warning: state_get_saved_brightness_clicks -> {ex}')
-        state_save_brightness_clicks(9)
-        return 9
-
-
-def state_get_saved_models_index():
-    try:
-        with open(FILE_SAVED_PREFERENCES, 'r') as f:
-            d = toml.load(f)
-            v = d['models_idx']
-            lg.a(f'read saved models index = {v} from preferences file')
-            return v
-    except (Exception, ) as ex:
-        lg.a(f'warning: state_get_saved_models_index -> {ex}')
-        state_save_models_index(0)
-        return 0
-
-
-def state_save_brightness_clicks(v):
-    d = dict()
-    d['brightness'] = v
-    with open(FILE_SAVED_PREFERENCES, 'w') as f:
-        toml.dump(d, f)
-    lg.a(f'saving brightness = {v} to preferences file')
-
-
-def state_save_models_index(v):
-    d = dict()
-    d['models_idx'] = v
-    with open(FILE_SAVED_PREFERENCES, 'w') as f:
-        toml.dump(d, f)
-    lg.a(f'saving model index = {v} to preferences file')
 
 
 def state_ble_init_rv_notes(d: dict):
