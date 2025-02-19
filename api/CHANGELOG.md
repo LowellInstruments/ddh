@@ -25,3 +25,7 @@
 1.0.07 - February 10, 2025
 
     ep_history we added a "since" parameter
+
+1.0.08 - February 18, 2025
+
+    make ep_history compare against local time not UTC
