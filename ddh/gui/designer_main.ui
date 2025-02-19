@@ -41,7 +41,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>6</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <property name="sizePolicy">
@@ -713,25 +713,47 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout" stretch="1,10,1,10">
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="2,2,1,2">
               <item>
                <widget class="QPushButton" name="btn_see_all">
+                <property name="maximumSize">
+                 <size>
+                  <width>75</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
                 <property name="text">
-                 <string>see all</string>
+                 <string>all</string>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QPushButton" name="btn_see_cur">
                 <property name="text">
-                 <string>see current</string>
+                 <string>current</string>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QPushButton" name="btn_known_clear">
+                <property name="maximumSize">
+                 <size>
+                  <width>50</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
                 <property name="text">
-                 <string>clear</string>
+                 <string>x</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="line_sn">
+                <property name="maxLength">
+                 <number>7</number>
+                </property>
+                <property name="clearButtonEnabled">
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>

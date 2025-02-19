@@ -491,6 +491,7 @@ def gui_setup_buttons(my_app):
 
     # advanced stuff
     a.cbox_scf.activated.connect(a.click_cbox_scf)
+    a.line_sn.textChanged.connect(a.cb_line_sn_textChanged)
 
 
 def gui_hide_edit_tab(ui):

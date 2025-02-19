@@ -684,6 +684,17 @@ class DDH(QMainWindow, d_m.Ui_MainWindow):
         self.gif_map.start()
         self.map_filename = m
 
+    def cb_line_sn_textChanged(self):
+        v = self.line_sn.text()
+        if v == "":
+            return
+        self.lst_mac_org.clear()
+        pp = get_ddh_toml_all_macs_content()
+        for m, sn in pp.items():
+            if str(sn).startswith(v):
+                s = f"{m}  {sn}"
+                self.lst_mac_org.addItem(s)
+
     def click_cbox_scf(self):
         v = self.cbox_scf.currentText()
         fol = ddh_get_folder_path_scripts()

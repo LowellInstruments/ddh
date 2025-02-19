@@ -32,7 +32,7 @@ sed -i 's/self.webView = QtWebEngineWidgets.QWebEngineView(self.tab_trawls)/self
 
 
 
-# for crontab to detect already running
+# for crontab to detect python already running
 check_already_running "main_ddh_controller"
 
 

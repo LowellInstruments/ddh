@@ -13,7 +13,7 @@ fi
 
 
 
-# for crontab to detect already running
+# for crontab to detect python already running
 check_already_running "main_dds_controller"
 
 
