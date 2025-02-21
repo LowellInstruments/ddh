@@ -94,8 +94,10 @@ def _th_gpio_box_buttons_new():
 
 def dds_create_buttons_thread():
     if exp_get_new_side_buttons() == 1:
+        print('creating NEW buttons thread')
         bth = threading.Thread(target=_th_gpio_box_buttons_new)
         bth.start()
     else:
+        print('creating OLD buttons thread')
         bth = threading.Thread(target=_th_gpio_box_buttons)
         bth.start()
