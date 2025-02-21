@@ -11,6 +11,9 @@ from utils.ddh_shared import (
 )
 
 
+new_or_old = exp_get_new_side_buttons()
+
+
 
 TIME_LO_S = .5
 TIME_DB_S = .001
@@ -56,9 +59,10 @@ MS_1 = (1 / 1000)
 PIN_BTN_1 = 16
 PIN_BTN_2 = 20
 PIN_BTN_3 = 21
-b1 = Button(PIN_BTN_1, pull_up=True, bounce_time=MS_1)
-b2 = Button(PIN_BTN_2, pull_up=True, bounce_time=MS_1)
-b3 = Button(PIN_BTN_3, pull_up=True, bounce_time=MS_1)
+if new_or_old == 1:
+    b1 = Button(PIN_BTN_1, pull_up=True, bounce_time=MS_1)
+    b2 = Button(PIN_BTN_2, pull_up=True, bounce_time=MS_1)
+    b3 = Button(PIN_BTN_3, pull_up=True, bounce_time=MS_1)
 
 
 def button1_pressed_cb():
@@ -93,7 +97,7 @@ def _th_gpio_box_buttons_new():
 
 
 def dds_create_buttons_thread():
-    if exp_get_new_side_buttons() == 1:
+    if new_or_old == 1:
         print('creating NEW buttons thread')
         bth = threading.Thread(target=_th_gpio_box_buttons_new)
         bth.start()
