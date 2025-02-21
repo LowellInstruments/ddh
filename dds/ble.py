@@ -387,6 +387,8 @@ async def _ble_interact_one_logger(mac, info: str, h, g):
 
 async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
 
+    t_slo = BLE_SMART_LOCKOUT_PURGE_S
+
     for mac, model in macs_det.items():
         mac = mac.lower()
         if mac not in macs_mon:
@@ -394,26 +396,31 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
 
         _b = is_mac_in_black(mac)
         _o = is_mac_in_orange(mac)
+        ev = f'dl_{mac}'
+        tell_ev_color = 'tell_color_' + ev
+        tell_ev_deck = 'tell_deck_' + ev
+        sn = dds_get_cfg_logger_sn_from_mac(mac)
 
         # small helps in distance-detection issues
         _ble_show_logger_spotted(mac, _b, _o)
 
         if _b or _o:
+            # do nothing, but refresh logger since it is black or orange
+            if is_it_time_to(tell_ev_color, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
+                lg.a(f"warning: ignoring logger {sn} because colored mac")
+            annotate_time_this_occurred(ev, BLE_SMART_LOCKOUT_PURGE_S)
             continue
 
         # check smart lock-out
-        sn = dds_get_cfg_logger_sn_from_mac(mac)
-        ev = f'dl_{mac}'
-        t = BLE_SMART_LOCKOUT_PURGE_S
         if exp_get_use_smart_lockout() == 1:
-            if is_it_time_to(ev, t, annotate=False):
+            if is_it_time_to(ev, t_slo, annotate=False):
                 # do this logger, will annotate later if succeeds
                 lg.a(f'debug: smart lock-out allows this logger')
             else:
                 # do nothing, but refresh logger still on-boat
-                annotate_time_this_occurred(ev, BLE_SMART_LOCKOUT_PURGE_S)
-                if is_it_time_to(ev, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
+                if is_it_time_to(tell_ev_deck, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
                     lg.a(f'warning: ignoring logger {sn} because left on-deck')
+                annotate_time_this_occurred(ev, BLE_SMART_LOCKOUT_PURGE_S)
                 continue
 
         # show the position of the logger we will download

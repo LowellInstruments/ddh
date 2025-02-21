@@ -385,6 +385,7 @@ def aws_cp():
     # run as a different process for smoother GUI
     if not linux_is_rpi():
         lg.a("debug: during development, AWS cp with --dryrun flag")
+
     ls_diff = list(d_diff.keys())
     p = Process(target=_aws_s3_cp_process, args=(ls_diff,))
     p.start()

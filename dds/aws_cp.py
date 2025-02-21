@@ -29,7 +29,8 @@ def aws_cp_build_inventory_of_dl_files_folder():
             f.endswith('.csv') or
             f.endswith('.gps') or
             f.endswith('.cst') or
-            f.endswith('.txt') or
+            # so we don't update TXT growing over and over
+            # f.endswith('.txt') or
             f.endswith('.bin')}
 
 
@@ -57,10 +58,8 @@ def aws_cp_compare_built_inventory_vs_db_file(d_new):
     for name, size in d_new.items():
         if name not in d_old.keys():
             d_diff[name] = size
-            print(f'name {name} not in d_old.keys()')
         elif name in d_old.keys() and size != d_old[name]:
             d_diff[name] = size
-            print(f'size != d_old[name] -> {size} != {d_old[name]}')
 
     return d_diff
 
