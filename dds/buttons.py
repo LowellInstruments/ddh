@@ -30,14 +30,14 @@ def _th_gpio_box_buttons():
     if not linux_is_rpi():
         return
 
-    if new_or_old == 0:
-        b1 = Button(PIN_BTN_1, pull_up=True, bounce_time=TIME_DB_S)
-        b2 = Button(PIN_BTN_2, pull_up=True, bounce_time=TIME_DB_S)
-        b3 = Button(PIN_BTN_3, pull_up=True, bounce_time=TIME_DB_S)
-    else:
+    if new_or_old == 1:
         b1 = Button(PIN_BTN_1, pull_up=True, bounce_time=MS_1)
         b2 = Button(PIN_BTN_2, pull_up=True, bounce_time=MS_1)
         b3 = Button(PIN_BTN_3, pull_up=True, bounce_time=MS_1)
+    else:
+        b1 = Button(PIN_BTN_1, pull_up=True, bounce_time=TIME_DB_S)
+        b2 = Button(PIN_BTN_2, pull_up=True, bounce_time=TIME_DB_S)
+        b3 = Button(PIN_BTN_3, pull_up=True, bounce_time=TIME_DB_S)
 
     def _cb():
         t = time.perf_counter()
@@ -72,14 +72,15 @@ def _th_gpio_box_buttons():
         if b3.is_pressed:
             pass
 
-    if new_or_old == 0:
-        b1.when_pressed = b1_cb_v0
-        b2.when_pressed = b2_cb_v0
-        b3.when_pressed = b3_cb_v0
-    else:
+    if new_or_old == 1:
         b1.when_pressed = b1_cb_v1
         b2.when_pressed = b2_cb_v1
         b3.when_pressed = b3_cb_v1
+    else:
+        b1.when_pressed = b1_cb_v0
+        b2.when_pressed = b2_cb_v0
+        b3.when_pressed = b3_cb_v0
+
     pause()
 
 
