@@ -14,10 +14,10 @@ import setproctitle
 
 from dds.aws_cp import (
     PATH_AWS_CP_DB,
-    aws_cp_get_dl_files_folder_content,
+    aws_cp_build_inventory_of_dl_files_folder,
     aws_cp_init,
-    aws_cp_add,
-    aws_cp_compare_new_vs_database
+    aws_cp_add_to_db_file,
+    aws_cp_compare_built_inventory_vs_db_file
 )
 from dds.emolt import this_box_has_grouped_s3_uplink
 from dds.net import ddh_get_internet_via
@@ -331,9 +331,9 @@ def _aws_s3_cp_process(ls):
             _u(STATE_DDS_NOTIFY_CLOUD_ERR)
             lg.a(f"error: {rv.stderr}")
             sys.exit(2)
-        else:
-            # add to database as file copied
-            aws_cp_add(path, os.path.getsize(path))
+
+        # add to database as file copied
+        aws_cp_add_to_db_file(path, os.path.getsize(path))
 
         # this file went OK
         _u(STATE_DDS_NOTIFY_CLOUD_OK)
@@ -347,8 +347,8 @@ def _aws_s3_cp_process(ls):
 def aws_cp():
 
     # get difference
-    d_new = aws_cp_get_dl_files_folder_content()
-    d_diff = aws_cp_compare_new_vs_database(d_new)
+    d_new = aws_cp_build_inventory_of_dl_files_folder()
+    d_diff = aws_cp_compare_built_inventory_vs_db_file(d_new)
 
     # ls: {file_name: file_size, ...}
     if not d_diff:
