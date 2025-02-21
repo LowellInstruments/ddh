@@ -401,14 +401,13 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
         tell_ev_deck = 'tell_deck_' + ev
         sn = dds_get_cfg_logger_sn_from_mac(mac)
 
-        # small helps in distance-detection issues
+        # from time to time it tells you the logger is under colored lists
         _ble_show_logger_spotted(mac, _b, _o)
 
         if _b or _o:
             # do nothing, but refresh logger since it is black or orange
-            if is_it_time_to(tell_ev_color, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
-                lg.a(f"warning: ignoring logger {sn} because colored mac")
-            annotate_time_this_occurred(ev, BLE_SMART_LOCKOUT_PURGE_S)
+            if exp_get_use_smart_lockout() == 1:
+                annotate_time_this_occurred(ev, BLE_SMART_LOCKOUT_PURGE_S)
             continue
 
         # check smart lock-out
@@ -417,7 +416,7 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
                 # do this logger, will annotate later if succeeds
                 lg.a(f'debug: smart lock-out allows this logger')
             else:
-                # do nothing, but refresh logger still on-boat
+                # will NOT interact, but refresh logger still on-boat
                 if is_it_time_to(tell_ev_deck, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
                     lg.a(f'warning: ignoring logger {sn} because left on-deck')
                 annotate_time_this_occurred(ev, BLE_SMART_LOCKOUT_PURGE_S)
@@ -426,7 +425,7 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
         # show the position of the logger we will download
         gps_utils_log_position_logger(g)
 
-        # work with ONE logger of the scanned ones
+        # will YES interact with ONE logger of the scanned ones
         return await _ble_interact_one_logger(mac, model, _h, g)
 
 
