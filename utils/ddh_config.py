@@ -322,6 +322,10 @@ def exp_get_conf_dox():
     return int(rv)
 
 
+def exp_get_new_side_buttons():
+    return _get_exp_key_from_cfg('use_new_side_buttons')
+
+
 if __name__ == '__main__':
     print('vessel_name', dds_get_cfg_vessel_name())
     print('aws_en', dds_get_cfg_aws_en())
