@@ -254,6 +254,7 @@ def aws_sync(yyyy=datetime.datetime.utcnow().year):
     past_n_files = len(mon_ls)
     if len(mon_ls) == 0:
         lg.a('warning: 0 total files, not syncing')
+        _u(STATE_DDS_NOTIFY_CLOUD_OK)
         return
     if ff_ctt and not doing_last_year_sync:
         lg.a('number of files did not change, not S3 syncing')
