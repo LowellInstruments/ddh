@@ -406,7 +406,7 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
 
         if _b or _o:
             # do nothing, but refresh logger since it is black or orange
-            if exp_get_use_smart_lockout() == 1:
+            if exp_get_use_smart_lockout() == 1 and _b:
                 annotate_time_this_occurred(ev, BLE_SMART_LOCKOUT_PURGE_S)
             continue
 

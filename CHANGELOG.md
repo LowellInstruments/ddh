@@ -339,3 +339,7 @@
 
     fixed continuously uploading same but growing track.txt to AWS S3
     fixed smart_lock_out when colored macs
+
+4.0.77 February 24, 2025
+
+    adjusted smart_lock_out condition
