@@ -343,3 +343,7 @@
 4.0.77 February 24, 2025
 
     adjusted smart_lock_out condition
+
+4.0.78 February 26, 2025
+
+    improved switch wifi-to-cell-to-wifi condition
