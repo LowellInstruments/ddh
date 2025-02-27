@@ -19,6 +19,10 @@ async def ble_tst(mac):
         rv = await lc.cmd_mts()
         if rv:
             raise Exception(f'error: sending command MTS, aborting')
+        print(f'sending FRM command {i + 1} / {n}')
+        rv = await lc.cmd_frm()
+        if rv:
+            raise Exception(f'error: sending command FRM, aborting')
 
     await lc.disconnect()
 
