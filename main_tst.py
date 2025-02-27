@@ -9,13 +9,14 @@ from utils.ddh_shared import (
 )
 
 
-async def ble_tst(mac):
+async def ble_tst():
 
     # call of the script
     bn = os.path.basename(sys.argv[0])
-    if len(sys.argv) != 2:
-        raise Exception(f'error: usage {bn} number_of_iterations')
-    n = int(sys.argv[1])
+    mac = sys.argv[1]
+    n = int(sys.argv[2])
+    if len(sys.argv) != 3:
+        raise Exception(f'error: usage {bn} <logger_mac> number_of_iterations')
 
     # connect to logger
     lc = BleCC26X2()
@@ -41,6 +42,4 @@ async def ble_tst(mac):
 
 if __name__ == "__main__":
     ble_mat_disconnect_all_devices_ll()
-    m = "D0:2E:AB:D9:29:48"
-    _args = [m]
-    ael.run_until_complete(ble_tst(*_args))
+    ael.run_until_complete(ble_tst())
