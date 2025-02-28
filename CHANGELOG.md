@@ -356,4 +356,6 @@
 
     bug: super command DDH_B makes a logger crash
     solution: make DDH do not send super commands on lower version loggers
-
+    bug: sometime does not detect BLE dead
+    solution: created function linux_is_process_running_strict()
+    
