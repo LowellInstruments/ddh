@@ -40,6 +40,7 @@ from utils.ddh_shared import (
 
 g_debug_not_delete_files = False
 BAT_FACTOR_TDO = 0.5454
+MINIMUM_VERSION_TO_USER_SUPER_CMD = '4.4.00'
 
 
 def _une(rv, notes, e, ce=0):
@@ -111,14 +112,12 @@ class BleTDODownload:
             else:
                 lg.a(f'debug: not sent SCF {tag} {v}, it\'s the same')
 
-    # ----------------------------------------
-    # download fast method, commands DDA, DDB
-    # ----------------------------------------
-
     @staticmethod
-    async def dl_fast(lc, mac, g, notes: dict, u):
+    async def _download_use_super_commands(lc, mac, g, notes: dict, u):
 
+        # ----------------------------------------
         # DDH "A" command includes GTM, SWS, DIR
+        # ----------------------------------------
         rv, ls = await lc.cmd_ddh_a(g)
         _rae(rv, "DDA error listing files: " + str(rv))
         lg.a(f"DIR: {ls}")
@@ -174,11 +173,13 @@ class BleTDODownload:
                 gpq_create_fixed_mode_file(g, name)
 
         # -------------------------------------------------
-        # TDO profiling reconfiguration here for fast mode
+        # TDO profiling reconfiguration here for FAST mode
         # -------------------------------------------------
         await BleTDODownload.reconfigure_tdo_profiling(notes['gfv'], lc)
 
+        # ----------------------------------------------
         # DDH "B" command includes STM, BAT, FRM, RWS
+        # ----------------------------------------------
         do_not_rerun_flag = get_ddh_do_not_rerun_flag_li()
         do_we_rerun = not do_not_rerun_flag
         rv, v = await lc.cmd_ddh_b(rerun=do_we_rerun)
@@ -203,14 +204,12 @@ class BleTDODownload:
         if not do_we_rerun:
             lg.a("warning: this logger is not set for auto-re-run")
 
-        # -----------------------
         # bye, bye to this logger
-        # -----------------------
         await lc.disconnect()
         return 0
 
     @staticmethod
-    async def download_recipe(lc, mac, g, notes: dict, u):
+    async def download_tdo_logger(lc, mac, g, notes: dict, u):
 
         state_ble_init_rv_notes(notes)
         create_folder_logger_by_mac(mac)
@@ -226,24 +225,27 @@ class BleTDODownload:
             # out of here for sure
             raise BLEAppException("TDO interact logger reset file")
 
+        # ------------------------------------------------------
+        # get the version to filter loggers with SUPER commands
+        # ------------------------------------------------------
         rv, v = await lc.cmd_gfv()
         _rae(rv, "gfv")
         lg.a(f"GFV | {v}")
         notes['gfv'] = v
 
-        # --------------------------------------
-        # for newer loggers with super commands
-        # --------------------------------------
+        # do type of download fast
         lg.x()
-        if v >= "4.0.04":
+        if v >= MINIMUM_VERSION_TO_USER_SUPER_CMD:
             lg.a("debug: ---------------------------")
             lg.a("debug: running DL TDO fast version")
             lg.a("debug: ---------------------------")
-            return await BleTDODownload.dl_fast(lc, mac, g, notes, u)
-        else:
-            lg.a("debug: -----------------------------")
-            lg.a("debug: running DL TDO normal version")
-            lg.a("debug: -----------------------------")
+            lg.x()
+            return await BleTDODownload._download_use_super_commands(lc, mac, g, notes, u)
+
+        # do old type of download
+        lg.a("debug: -----------------------------")
+        lg.a("debug: running DL TDO normal version")
+        lg.a("debug: -----------------------------")
         lg.x()
 
         rv, state = await lc.cmd_sts()
@@ -427,7 +429,7 @@ async def ble_interact_tdo(mac, info, g, h, u):
 
     try:
         lg.a(f"debug: interacting {info} logger")
-        rv = await BleTDODownload.download_recipe(lc, mac, g, notes, u)
+        rv = await BleTDODownload.download_tdo_logger(lc, mac, g, notes, u)
 
     except Exception as ex:
         await lc.disconnect()

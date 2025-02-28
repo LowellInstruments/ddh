@@ -347,3 +347,13 @@
 4.0.78 February 26, 2025
 
     improved switch wifi-to-cell-to-wifi condition
+
+4.0.79 Febfruary 28, 2025
+
+    skipped so 4.0.80 fixing a bug is easier to remember
+
+4.0.80 February 28, 2025
+
+    bug: super command DDH_B makes a logger crash
+    solution: make DDH do not send super commands on lower version loggers
+

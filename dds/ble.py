@@ -154,9 +154,13 @@ def _ble_convert_lid_after_download(d):
             _ble_detect_hypoxia_after_download(f, bat, g, u)
 
         if n == LID_FILE_V1:
-            # do the old MAT library conversion
-            parameters = default_parameters()
-            DataConverter(f, parameters).convert()
+            try:
+                # do the old MAT library conversion
+                parameters = default_parameters()
+                DataConverter(f, parameters).convert()
+            except (Exception, ) as ex:
+                lg.a(f"error: cannot convert {_bn} -> {ex}")
+                return
         lg.a(f"OK: post-download conversion of LID v{n} file {_bn} ended")
 
 
