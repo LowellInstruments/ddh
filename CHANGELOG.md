@@ -358,4 +358,8 @@
     solution: make DDH do not send super commands on lower version loggers
     bug: sometime does not detect BLE dead
     solution: created function linux_is_process_running_strict()
+
+4.0.81 February 28, 2025
+
+    removed bad code to force bug on aws
     
