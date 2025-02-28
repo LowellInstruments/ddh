@@ -455,8 +455,6 @@ def aws_sync_or_cp():
         annotate_time_this_occurred(k, period_aws_cp_secs)
         return
 
-    raise JSONDecodeError
-
     # upload upon newly downloaded BLE files
     if os.path.exists(flag_dl):
         lg.a(f'doing S3 copy session, detected flag BLE download')
