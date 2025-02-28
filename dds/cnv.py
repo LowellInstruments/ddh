@@ -181,8 +181,15 @@ def cnv_serve():
 
 
 if __name__ == '__main__':
-    ff = glob.glob("/tmp/my_bkt_waf/**/*.lid", recursive=True)
-    parameters = default_parameters()
-    for i, _f in enumerate(ff):
-        print(f'doing file {i} / {len(ff)} {_f}')
-        DataConverter(_f, parameters).convert()
+    # ff = glob.glob("/tmp/my_bkt_waf/**/*.lid", recursive=True)
+    # parameters = default_parameters()
+    # for i, _f in enumerate(ff):
+    #     print(f'doing file {i} / {len(ff)} {_f}')
+    #     DataConverter(_f, parameters).convert()
+
+    fol = '/home/kaz/Downloads/2412771 TDO'
+    ff = glob.glob(f"{fol}/*.lid")
+    print(ff)
+    for f in ff:
+        convert_lix_file(f, more_columns=True)
+

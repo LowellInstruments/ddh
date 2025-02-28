@@ -370,9 +370,9 @@ def cb_print_check_all_keys(verbose=True):
 
 
 def cb_is_ddh_running():
-    rh = sp.run('ps aux | grep main_ddh | grep -v grep > /dev/null',
+    rh = sp.run('ps aux | grep -w main_ddh | grep -v grep > /dev/null',
                 shell=True).returncode == 0
-    rs = sp.run('ps aux | grep main_dds | grep -v grep > /dev/null',
+    rs = sp.run('ps aux | grep -w main_dds | grep -v grep > /dev/null',
                 shell=True).returncode == 0
     return int(rh and rs)
 

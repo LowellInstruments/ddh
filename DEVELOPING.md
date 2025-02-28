@@ -4,6 +4,10 @@ This page contains some hints to take into account when switching between laptop
 
 ## designer_main.py
 
+On laptop, you will need:
+
+    pip install PyQtWebEngine
+
 On laptop, code needs 2 changes after a pyuic5:
 
     from PyQt5 import QtWebKitWidgets --> from PyQt5 import QtWebEngineWidgets

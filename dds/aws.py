@@ -17,7 +17,7 @@ from dds.aws_cp import (
     aws_cp_build_inventory_of_dl_files_folder,
     aws_cp_init,
     aws_cp_add_to_db_file,
-    aws_cp_compare_built_inventory_vs_db_file
+    aws_cp_compare_built_inventory_vs_db_file, _inventory_load_from_db_file
 )
 from dds.emolt import this_box_has_grouped_s3_uplink
 from dds.net import ddh_get_internet_via
@@ -455,6 +455,8 @@ def aws_sync_or_cp():
         annotate_time_this_occurred(k, period_aws_cp_secs)
         return
 
+    raise JSONDecodeError
+
     # upload upon newly downloaded BLE files
     if os.path.exists(flag_dl):
         lg.a(f'doing S3 copy session, detected flag BLE download')
@@ -473,4 +475,5 @@ def aws_sync_or_cp():
 
 # test
 if __name__ == "__main__":
-    aws_cp()
+    db = _inventory_load_from_db_file()
+    print(db)

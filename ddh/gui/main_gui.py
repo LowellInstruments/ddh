@@ -52,7 +52,7 @@ from ddh.utils_trawls import (
 )
 from dds.notifications_v2 import notify_via_sms
 from dds.timecache import is_it_time_to
-from mat.linux import linux_is_process_running
+from mat.linux import linux_is_process_running, linux_is_process_running_strict
 from utils.ddh_config import (
     dds_get_cfg_vessel_name,
     dds_get_cfg_logger_mac_from_sn,
@@ -172,7 +172,7 @@ class DDH(QMainWindow, d_m.Ui_MainWindow):
 
     @staticmethod
     def _callback_timer_ble_alive():
-        if not linux_is_process_running(NAME_EXE_DDS):
+        if not linux_is_process_running_strict(NAME_EXE_DDS):
             if is_it_time_to('tell_BLE_dead', 1800):
                 lg.a("warning: BLE service seems dead")
             send_ddh_udp_gui(STATE_DDS_BLE_SERVICE_INACTIVE)

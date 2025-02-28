@@ -72,7 +72,7 @@ def api_linux_is_rpi():
 
 
 def api_linux_is_process_running(name) -> bool:
-    cmd = 'ps -aux | grep {} | grep -v grep'.format(name)
+    cmd = f'ps -aux | grep -w {name} | grep -v grep'
     rv = sp.run(cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     return rv.returncode == 0
 
@@ -302,10 +302,10 @@ def api_set_crontab(on_flag):
 
 
 def api_get_running_ddh_dds():
-    rv_h = _sh('ps -aux | grep "main_ddh" | grep -v grep')
-    rv_s = _sh('ps -aux | grep "main_dds" | grep -v grep')
-    rv_hc = _sh('ps -aux | grep "main_ddh_controller" | grep -v grep')
-    rv_hs = _sh('ps -aux | grep "main_dds_controller" | grep -v grep')
+    rv_h = _sh('ps -aux | grep -w main_ddh | grep -v grep')
+    rv_s = _sh('ps -aux | grep -w main_dds | grep -v grep')
+    rv_hc = _sh('ps -aux | grep -w main_ddh_controller | grep -v grep')
+    rv_hs = _sh('ps -aux | grep -w main_dds_controller | grep -v grep')
     return {
         'ddh': int(rv_h.returncode == 0),
         'dds': int(rv_s.returncode == 0),
