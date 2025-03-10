@@ -81,8 +81,9 @@ def controller_main_ddh():
         if kill:
             # in this order or message does not show
             lg.a(f'debug: closing GUI, crontab will relaunch it', show_ts=0)
-            # this kills DDH, not DDS
-            ddh_kill_by_pid_file(only_child=False)
+
+            # kills GUI + GUI controller but not DDS, crontab will relaunch them
+            ddh_kill_by_pid_file()
 
 
 if __name__ == "__main__":

@@ -292,9 +292,11 @@ class DDH(QMainWindow, d_m.Ui_MainWindow):
         c = f'killall {NAME_EXE_API}'
         sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
 
-        # bye, bye DDS
-        dds_kill_by_pid_file(only_child=False)
-        ddh_kill_by_pid_file(only_child=False)
+        # bye, bye all DDS
+        dds_kill_by_pid_file()
+
+        # bye, bye all DDS
+        ddh_kill_by_pid_file()
 
         # bye, bye DDH
         sys.stderr.close()
@@ -328,6 +330,7 @@ class DDH(QMainWindow, d_m.Ui_MainWindow):
         elif k == "q":
             p = ddh_get_gui_closed_flag_file()
             pathlib.Path.touch(p, exist_ok=True)
+            # theoretically, only kills both DDS
             dds_kill_by_pid_file()
             lg.a("closing by keypress 'q'")
             sys.stderr.close()
@@ -470,6 +473,7 @@ class DDH(QMainWindow, d_m.Ui_MainWindow):
         p = ddh_get_gui_closed_flag_file()
         pathlib.Path.touch(p, exist_ok=True)
         dds_kill_by_pid_file()
+        # normally on laptop
         lg.a("closing by clicking upper-right X")
         sys.stderr.close()
         os._exit(0)
