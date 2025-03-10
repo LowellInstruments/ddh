@@ -91,7 +91,7 @@ async def deploy_logger_tdo(mac, sn, cfg_from_menu):
                 d = toml.load(f)['profiling']
 
             # send the hardcoded DHU
-            rv = await lc.cmd_scc('DHU', '00050')
+            rv = await lc.cmd_scc('DHU', '00101')
             _e(rv, "scc_dhu")
             await asyncio.sleep(.1)
 
