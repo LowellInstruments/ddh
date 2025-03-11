@@ -366,4 +366,10 @@
 4.0.82 March 11, 2025
 
     changed buttons to work by default with new thread by setting new_or_old = 1 in buttons.py
-    test #6 to create release
+    test #8 to create the release
+    we now create releases with the following commands:
+        git add -A
+        git commit -m 'whatever'
+        git tag v1234
+        git push -u origin toml tag v1234
+
