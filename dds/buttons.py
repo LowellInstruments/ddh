@@ -11,8 +11,9 @@ from utils.ddh_shared import (
 )
 
 
-new_or_old = exp_get_new_side_buttons()
-
+# old based on config.toml flag
+# new_or_old = exp_get_new_side_buttons()
+new_or_old = 1
 
 
 TIME_LO_S = .5

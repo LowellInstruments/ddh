@@ -362,4 +362,7 @@
 4.0.81 February 28, 2025
 
     removed bad code to force bug on aws
-    
+
+4.0.82 March 11, 2025
+
+    changed buttons to work by default with new thread by setting new_or_old = 1 in buttons.py
