@@ -46,11 +46,11 @@ def api_get_api_version():
 
 
 def api_dws_stop():
-    return _sh('systemctl stop dwagent.service')
+    return _sh('sudo systemctl stop dwagent.service')
 
 
 def api_dws_start():
-    return _sh('systemctl start dwagent.service')
+    return _sh('sudo systemctl start dwagent.service')
 
 
 def api_dws_status():
