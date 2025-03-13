@@ -374,3 +374,6 @@
         git push -u origin toml tag v1234
     DDT also changed
 
+4.0.83 March 13, 2025
+
+    bug: in some very weird case, JSON-SQS files cannot be decoded, fixed it

@@ -80,8 +80,16 @@ def sqs_serve():
             continue
 
         # reads local SQS file as JSON
-        f = open(i_f, "r")
-        j = json.load(f)
+        try:
+            f = open(i_f, "r")
+            j = json.load(f)
+        except (Exception, ) as ex:
+            lg.a(f'error: SQS file {i_f} cannot be JSON decoded -> {ex}')
+            os.unlink(i_f)
+            lg.a(f'warning: deleted SQS file {i_f}')
+            continue
+
+        # display basename
         _bn = os.path.basename(i_f)
         lg.a(f"serving file {_bn}")
 
