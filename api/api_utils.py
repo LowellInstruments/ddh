@@ -53,6 +53,11 @@ def api_dws_start():
     return _sh('systemctl start dwagent.service')
 
 
+def api_dws_status():
+    # 0 when active, 1 otherwise
+    return _sh('systemctl systemctl is-active --quiet dwagent.service')
+
+
 def _sh(c):
     rv = sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     if rv.returncode:
