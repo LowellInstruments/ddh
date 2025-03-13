@@ -55,7 +55,7 @@ def api_dws_start():
 
 def api_dws_status():
     # 0 when active, 1 otherwise
-    return _sh('systemctl systemctl is-active --quiet dwagent.service')
+    return _sh('systemctl is-active --quiet dwagent.service')
 
 
 def _sh(c):
