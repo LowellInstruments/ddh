@@ -45,6 +45,14 @@ def api_get_api_version():
         return 'error_get_api_version'
 
 
+def api_dws_stop():
+    return _sh('systemctl stop dwagent.service')
+
+
+def api_dws_start():
+    return _sh('systemctl start dwagent.service')
+
+
 def _sh(c):
     rv = sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     if rv.returncode:

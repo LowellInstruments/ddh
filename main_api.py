@@ -44,7 +44,7 @@ from api.api_utils import (
     api_get_kernel,
     api_send_email_crash,
     api_linux_is_process_running,
-    api_get_disk_capacity, api_ddh_side_button_2
+    api_get_disk_capacity, api_ddh_side_button_2, api_dws_start
 )
 from ddh.db.db_his import DbHis
 from utils.ddh_config import (
@@ -482,6 +482,22 @@ async def ep_api_test_crash():
 async def ep_api_ddh_side_button_2():
     api_ddh_side_button_2()
     return {'ddh_side_button_2': CTT_API_OK}
+
+
+@app.get("/dws_start")
+async def ep_api_dws_start():
+    rv = api_dws_start()
+    if rv.returncode:
+        return {'dws_start': CTT_API_ER}
+    return {'dws_start': CTT_API_OK}
+
+
+@app.get("/dws_stop")
+async def ep_api_dws_stop():
+    rv = api_dws_start()
+    if rv.returncode:
+        return {'dws_stop': CTT_API_ER}
+    return {'dws_stop': CTT_API_OK}
 
 
 def _alarm_api_crash(n):

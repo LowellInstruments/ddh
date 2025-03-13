@@ -29,3 +29,7 @@
 1.0.08 - February 18, 2025
 
     make ep_history compare against local time not UTC
+
+1.0.10 - March 13, 2025
+
+    added DWService start / stop endpoints
