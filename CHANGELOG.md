@@ -377,3 +377,8 @@
 4.0.83 March 13, 2025
 
     bug: in some very weird case, JSON-SQS files cannot be decoded, fixed it
+
+4.0.84 March 19, 2025
+
+    simplified smart-lockout, this does not affect users because it is still an experimental flag
+
