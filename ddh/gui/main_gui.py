@@ -514,7 +514,7 @@ class DDH(QMainWindow, d_m.Ui_MainWindow):
             lg.a("debug: main_gui detect pressed button 3")
             global g_key3_idx
             gui_ddh_set_key3_brightness(self, g_key3_idx)
-            g_key3_idx = (g_key3_idx + 2) % 10
+            g_key3_idx = ((g_key3_idx * 2) % 12) + 6
             return
 
         elif ev.key() == Qt.Key_M:
