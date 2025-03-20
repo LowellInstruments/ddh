@@ -96,7 +96,6 @@ from utils.wdog import gui_dog_clear
 
 
 _g_flag_ble_en = dds_get_cfg_flag_ble_en()
-g_key3_idx = 0
 
 
 class DDH(QMainWindow, d_m.Ui_MainWindow):
@@ -512,10 +511,8 @@ class DDH(QMainWindow, d_m.Ui_MainWindow):
 
         elif ev.key() == Qt.Key_3:
             lg.a("debug: main_gui detect pressed button 3")
-            global g_key3_idx
-            # 9 to 18
-            gui_ddh_set_key3_brightness(self, 9 + g_key3_idx)
-            g_key3_idx = (g_key3_idx + 1) % 10
+            # they decided 0 but minimum was 9
+            gui_ddh_set_key3_brightness(self, 0)
             return
 
         elif ev.key() == Qt.Key_M:
