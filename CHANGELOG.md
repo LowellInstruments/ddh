@@ -382,3 +382,8 @@
 
     simplified smart-lockout, this does not affect users because it is still an experimental flag
 
+4.0.85 March 20, 2025
+
+    now the lowest side button sets screen brightness to 0
+    you can use the highest side button to set it back to >0 values
+
