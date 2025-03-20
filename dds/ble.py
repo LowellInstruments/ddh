@@ -398,30 +398,34 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
         if mac not in macs_mon:
             continue
 
-        _b = is_mac_in_black(mac)
-        _o = is_mac_in_orange(mac)
+        # build variables
         ev = f'dl_{mac}'
         tell_ev_deck = 'tell_deck_' + ev
         sn = dds_get_cfg_logger_sn_from_mac(mac)
 
+        # check mac-colored lists
+        _b = is_mac_in_black(mac)
+        _o = is_mac_in_orange(mac)
+
         # from time to time it tells you the logger is under colored lists
         _ble_show_logger_spotted(mac, _b, _o)
 
-        # refresh smart-lockout when NOT time to do this logger
-        if exp_get_use_smart_lockout():
-            if not is_it_time_to(ev, t_slo, annotate=False):
-                annotate_time_this_occurred(ev, BLE_SMART_LOCKOUT_PURGE_S)
-                if is_it_time_to(tell_ev_deck, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
-                    lg.a(f'warning: ignoring logger {sn} because left on-deck')
+        # unconditionally refresh smart lock-out when logger in black list
+        if _b:
+            annotate_time_this_occurred(ev, BLE_SMART_LOCKOUT_PURGE_S)
 
         if _b or _o:
             continue
 
-        # check smart lock-out
+        # condition smart lock-out
         if exp_get_use_smart_lockout() == 1:
             if is_it_time_to(ev, t_slo, annotate=False):
-                # allow logger BUT don't annotate, will annotate upon download success
-                lg.a(f'debug: smart lock-out allows this logger')
+                # allow BUT don't annotate, will do so upon download success
+                lg.a(f'debug: smart lock-out allows logger {sn}')
+            else:
+                annotate_time_this_occurred(ev, BLE_SMART_LOCKOUT_PURGE_S)
+                if is_it_time_to(tell_ev_deck, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
+                    lg.a(f'debug: smart lock-out ignores logger {sn}, it seems left on-deck')
 
         # show the position of the logger we will download
         gps_utils_log_position_logger(g)
