@@ -1014,8 +1014,8 @@ def gui_ddh_set_key3_brightness(a, idx):
         lg.a("not raspberry, not setting brightness control via key3_idx")
         return
 
-    # I think minimum is 12
-    v = 12 + idx
+    # I think minimum is 11
+    v = 11 + idx
     b1 = '/sys/class/backlight/rpi_backlight/brightness"'
     b2 = '/sys/class/backlight/10-0045/brightness"'
     # requires root or $ chmod 777 /sys/class.../backlight
