@@ -7,7 +7,7 @@ from utils.ddh_config import exp_get_new_side_buttons
 from utils.ddh_shared import (
     send_ddh_udp_gui as _u,
     STATE_DDS_PRESSED_BUTTON_2,
-    STATE_DDS_PRESSED_BUTTON_1,
+    STATE_DDS_PRESSED_BUTTON_1, STATE_DDS_PRESSED_BUTTON_3,
 )
 
 
@@ -71,7 +71,7 @@ def _th_gpio_box_buttons():
     def b3_cb_v1():
         time.sleep(MS_10)
         if b3.is_pressed:
-            pass
+            _u(STATE_DDS_PRESSED_BUTTON_3)
 
     if new_or_old == 1:
         b1.when_pressed = b1_cb_v1

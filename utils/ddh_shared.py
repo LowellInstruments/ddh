@@ -57,6 +57,7 @@ STATE_DDS_BLE_CONNECTING = 'state_dds_ble_connecting'
 
 STATE_DDS_PRESSED_BUTTON_1 = 'state_dds_pressed_button1'
 STATE_DDS_PRESSED_BUTTON_2 = 'state_dds_pressed_button2'
+STATE_DDS_PRESSED_BUTTON_3 = 'state_dds_pressed_button3'
 
 
 STATE_DDS_NOTIFY_NET_VIA = "net_via"

@@ -43,7 +43,7 @@ from ddh.utils_gui import (
     gui_setup_graph_tab,
     gui_setup_timers,
     gui_setup_bootsplash,
-    gui_ddh_populate_dropdown_trawls_logger
+    gui_ddh_populate_dropdown_trawls_logger, gui_ddh_set_key3_brightness
 )
 from ddh.utils_trawls import (
     get_prev_trawl_of_a_logger,
@@ -96,6 +96,7 @@ from utils.wdog import gui_dog_clear
 
 
 _g_flag_ble_en = dds_get_cfg_flag_ble_en()
+g_key3_idx = 0
 
 
 class DDH(QMainWindow, d_m.Ui_MainWindow):
@@ -511,6 +512,10 @@ class DDH(QMainWindow, d_m.Ui_MainWindow):
 
         elif ev.key() == Qt.Key_3:
             lg.a("debug: main_gui detect pressed button 3")
+            global g_key3_idx
+            gui_ddh_set_key3_brightness(self, g_key3_idx)
+            g_key3_idx = (g_key3_idx +1) % 5
+            return
 
         elif ev.key() == Qt.Key_M:
             self.key_pressed = "m"

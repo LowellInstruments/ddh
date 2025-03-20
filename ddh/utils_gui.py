@@ -96,7 +96,7 @@ from utils.ddh_shared import (
     STATE_DDS_BLE_DOWNLOAD_STATISTICS,
     STATE_DDS_PRESSED_BUTTON_1,
     send_ddh_udp_gui,
-    STATE_DDS_BOOT_GUI, STATE_DDS_NOTIFY_GPS_STILL_WAITING_BOOT,
+    STATE_DDS_BOOT_GUI, STATE_DDS_NOTIFY_GPS_STILL_WAITING_BOOT, STATE_DDS_PRESSED_BUTTON_3,
 )
 from utils.flag_paths import LI_PATH_PLT_ONLY_INSIDE_WATER
 from utils.logs import lg_gui as lg
@@ -764,6 +764,9 @@ def _gui_parse_udp(my_app, s, ip="127.0.0.1"):
     elif f == STATE_DDS_PRESSED_BUTTON_2:
         a.keyPressEvent(ButtonPressEvent(Qt.Key_2))
 
+    elif f == STATE_DDS_PRESSED_BUTTON_3:
+        a.keyPressEvent(ButtonPressEvent(Qt.Key_3))
+
     elif f == STATE_DDS_BLE_DISABLED:
         _lock_icon(1)
         ct = _x(STR_RADIO_IS_DISABLED)
@@ -1004,6 +1007,26 @@ def gui_get_cfg_forget_time_secs():
     t = dds_get_cfg_forget_time_secs()
     assert t >= 600
     return t
+
+
+def gui_ddh_set_key3_brightness(a, idx):
+    if not linux_is_rpi():
+        lg.a("not raspberry, not setting brightness control via key3_idx")
+        return
+
+    # I think minimum is 12
+    v = 12 + idx
+    b1 = '/sys/class/backlight/rpi_backlight/brightness"'
+    b2 = '/sys/class/backlight/10-0045/brightness"'
+    # requires root or $ chmod 777 /sys/class.../backlight
+    s1 = f'bash -c "echo {str(v)} > {b1}'
+    s2 = f'bash -c "echo {str(v)} > {b2}'
+    o = sp.DEVNULL
+    sp.run(shlex.split(s1), stdout=o, stderr=o)
+    sp.run(shlex.split(s2), stdout=o, stderr=o)
+    xc = str(ceil(100 * v / 255))
+    a.lbl_brightness_txt.setText(xc + "%")
+    lg.a(f"setting backlight brightness to {v} ({xc}%), via key3 index")
 
 
 def gui_ddh_set_brightness(a):
