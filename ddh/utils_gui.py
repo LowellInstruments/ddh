@@ -1009,13 +1009,11 @@ def gui_get_cfg_forget_time_secs():
     return t
 
 
-def gui_ddh_set_key3_brightness(a, idx):
+def gui_ddh_set_key3_brightness(a, v):
     if not linux_is_rpi():
         lg.a("not raspberry, not setting brightness control via key3_idx")
         return
 
-    # I think minimum is 11
-    v = 11 + idx
     b1 = '/sys/class/backlight/rpi_backlight/brightness"'
     b2 = '/sys/class/backlight/10-0045/brightness"'
     # requires root or $ chmod 777 /sys/class.../backlight
