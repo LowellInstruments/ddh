@@ -11,9 +11,11 @@ _g_timecache = Cache(
 )
 
 
-def annotate_time_this_occurred(k, t):
+def annotate_time_this_occurred(k, t, pre_rm=False):
     if t <= 0:
         return
+    if pre_rm and _g_timecache.has(k):
+        delete_annotation(k)
     _g_timecache.add(k, k, ttl=t)
 
 
