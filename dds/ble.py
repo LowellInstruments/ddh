@@ -36,7 +36,8 @@ from dds.notifications_v2 import (
     notify_ddh_error_hw_ble
 )
 from dds.state import ddh_state
-from dds.timecache import is_it_time_to, annotate_time_this_occurred, delete_all_annotations_by_mask
+from dds.timecache import is_it_time_to, annotate_time_this_occurred, delete_all_annotations_by_mask, \
+    show_all_annotations_by_mask
 from mat.ble.ble_mat_utils import (
     ble_mat_systemctl_restart_bluetooth,
     ble_mat_get_antenna_type_v2
@@ -176,7 +177,7 @@ def _ble_analyze_and_graph_logger_result(rv,
     # success, update GUI with rerun
     if rv == 0:
         if exp_get_use_smart_lockout() == 1:
-            lg.a(f'debug: adding logger {sn} to smart lock-out')
+            lg.a(f'debug: adding logger {sn} to smart lock-out with event dl_{mac}')
             annotate_time_this_occurred(f'dl_{mac}', BLE_SMART_LOCKOUT_PURGE_S)
         rm_mac_black(mac)
         rm_mac_orange(mac)
@@ -419,6 +420,7 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
 
         # condition smart lock-out
         if exp_get_use_smart_lockout() == 1:
+            show_all_annotations_by_mask('dl_')
             if is_it_time_to(ev, t_slo, annotate=False):
                 # allow BUT don't annotate, will do so upon download success
                 lg.a(f'debug: smart lock-out allows logger {sn}')
@@ -426,6 +428,7 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
                 annotate_time_this_occurred(ev, BLE_SMART_LOCKOUT_PURGE_S)
                 if is_it_time_to(tell_ev_deck, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
                     lg.a(f'debug: smart lock-out ignores logger {sn}, it seems left on-deck')
+                continue
 
         # show the position of the logger we will download
         gps_utils_log_position_logger(g)
