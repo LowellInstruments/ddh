@@ -32,6 +32,7 @@ def show_all_annotations_by_mask(mask):
     for k in _g_timecache.keys():
         if k.startswith(mask):
             print(_g_timecache.get(k))
+            print(_g_timecache.get_ttl(k))
 
 
 def delete_all_annotations():
