@@ -69,9 +69,12 @@ def _th_gpio_box_buttons():
             _u(STATE_DDS_PRESSED_BUTTON_2)
 
     def b3_cb_v1():
-        time.sleep(MS_10)
-        if b3.is_pressed:
-            _u(STATE_DDS_PRESSED_BUTTON_3)
+        for i in range(50):
+            # half second
+            time.sleep(MS_10)
+            if not b3.is_pressed:
+                return
+        _u(STATE_DDS_PRESSED_BUTTON_3)
 
     if new_or_old == 1:
         b1.when_pressed = b1_cb_v1
