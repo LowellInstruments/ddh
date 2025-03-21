@@ -95,7 +95,7 @@ from utils.logs import lg_dds as lg
 # time the logger is NOT detected by BLE scan
 BLE_SMART_LOCKOUT_PURGE_S = 120
 # how often we tell this logger is not downloaded because SLO
-BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S = 300
+BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S = 600
 _g_logger_errors = {}
 
 
@@ -426,11 +426,14 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
         if _b or _o:
             continue
 
+        # for debug
+        # if exp_get_use_smart_lockout() == 1:
+        #     show_all_annotations_by_mask('dl_')
+
         # condition smart lock-out
         if exp_get_use_smart_lockout() == 1:
-            show_all_annotations_by_mask('dl_')
             if is_it_time_to(ev, t_slo, annotate=False):
-                # allow BUT don't annotate, will do so upon download success
+                # allow BUT NO annotate, only do upon download success
                 lg.a(f'debug: smart lock-out allows logger {sn}')
             else:
                 annotate_time_this_occurred(

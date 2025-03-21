@@ -390,4 +390,6 @@
 4.0.86 March 21, 2025
 
     DDC option 'g' now gives you more information and also resets at start
+    smart lock-out feature is finished but disabled by default
+
 
