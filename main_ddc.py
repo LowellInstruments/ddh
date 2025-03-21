@@ -4,6 +4,7 @@ import sys
 import time
 from os.path import exists
 import serial
+
 from mat.quectel import detect_quectel_usb_ports
 from scripts.script_ddc import (
     cb_gps_dummy, cb_quit, cb_gps_external, cb_crontab_ddh,
@@ -25,14 +26,12 @@ from utils.flag_paths import (
 import subprocess as sp
 from mat.utils import PrintColors as PC
 
-
 # cwd() is ddh folder here
 h = str(pathlib.Path.home())
 p = 'li/ddh' if is_rpi() else 'PycharmProjects/ddh'
 path_script_deploy_dox = f'{h}/{p}/scripts/run_script_deploy_logger_dox.sh'
 path_script_deploy_tdo = f'{h}/{p}/scripts/run_script_deploy_logger_tdo.sh'
 path_script_scan_li = f'{h}/{p}/scripts/run_script_scan_li.sh'
-
 
 # variables for errors and warnings
 g_e = None
@@ -139,7 +138,7 @@ def cb_get_csq():
         v = b.split(b'+CSQ: ')[1].split(b',')[0]
         # _p_e(f'CSQ v = {v}')
         v = int(v.decode())
-    except (Exception, ) as ex:
+    except (Exception,) as ex:
         _p_e(f'exception on CSQ {ex}')
         input()
         return
@@ -176,19 +175,36 @@ def cb_get_gsq():
         _p_e('could not detect quectel USB ports for CSQ')
         time.sleep(2)
         return
-    p_gps, _ = rv
+    p_gps, p_ctl = rv
 
     os.system('clear')
-    print('GPS quality test, running')
     ser = serial.Serial(p_gps, 115200, timeout=.1)
+    ser_ctl = serial.Serial(p_ctl, 115200, timeout=1)
+
+    # perform a reset at start
+    try:
+        print('GPS performing hot reset at start')
+        ser_ctl.write(b'AT+QGPSEND\r')
+        ser_ctl.write(b'AT+QGPSDEL=1\r')
+        ser_ctl.write(b'AT+QGPS=1\r')
+        rv = ser_ctl.read(100)
+        print('result: ', rv)
+
+    except (Exception,) as ex:
+        print('ex', ex)
+
+    time.sleep(3)
 
     # starts GPS signal quality loop
-    till_run = time.perf_counter() + 30
+    print('GPS quality test, running')
+    last_lat_lon = ''
+    last_time = ''
     dt = {}
-    # while time.perf_counter() < till_run:
     while 1:
         bb = bytes()
         we_have_line = 0
+
+        # get one GPS frame
         till_read = time.perf_counter() + 2
         while time.perf_counter() < till_read:
             b = ser.read()
@@ -196,14 +212,31 @@ def cb_get_gsq():
             if b == b'\n':
                 we_have_line = 1
                 break
-        if len(bb) < 20:
-            continue
+
+        # not valid
         if we_have_line == 0:
             continue
-        line = bb.decode()
-        if not line.startswith('$GPGSV'):
+        if len(bb) < 20:
             continue
 
+        # we only want GPGSV lines
+        line = bb.decode()
+        if not line.startswith('$GPGSV') and not line.startswith('$GPRMC'):
+            continue
+
+        if line.startswith('$GPRMC'):
+            g = line.split(',')
+            # g: ['$GPRMC', '145557.00', 'A', '4136.603719', 'N', '07036.560277', 'W', ...]
+            if g[2] == 'A':
+                def toDD(s):
+                    d = float(s[:-7])
+                    m = float(s[-7:]) / 60
+                    return d + m
+
+                last_lat_lon = (toDD(g[3]), g[4], toDD(g[5]), g[6])
+                last_time = f'{g[1][0:2]}:{g[1][2:4]}:{g[1][4:6]}'
+
+        # wait for the first frame of the GPGSV set
         line = line[:line.index('*')]
         f = line.split(',')
         tm = f[1]
@@ -211,6 +244,7 @@ def cb_get_gsq():
         sv = f[3]
         if mn == "1":
             os.system('clear')
+            print(f'time {last_time}  pos {last_lat_lon}')
             print(f'satellites in view = {sv}')
 
         # 1    = Total number of messages of this type in this cycle
@@ -262,17 +296,6 @@ def cb_test_buttons():
             p_e('no Rpi for buttons test')
             return
         from scripts.script_test_box_buttons import main_test_box_buttons
-        main_test_box_buttons()
-    except (Exception,) as ex:
-        p_e(str(ex))
-
-
-def cb_test_buttons_new():
-    try:
-        if not is_rpi():
-            p_e('no Rpi for buttons test')
-            return
-        from scripts.script_test_box_buttons_new import main_test_box_buttons
         main_test_box_buttons()
     except (Exception,) as ex:
         p_e(str(ex))
@@ -404,7 +427,6 @@ def cb_ddh_show_help():
 
 
 def main_ddc():
-
     # clearing error log file
     c_e()
 
@@ -435,18 +457,17 @@ def main_ddc():
             '1': (f"1) set GPS dummy     [{fgd}]", cb_gps_dummy),
             '2': (f"2) set GPS USB puck  [{fge}]", cb_gps_external),
             '3': (f"3) set crontab       [{fcd}]", cb_crontab_ddh),
-            #'4': (f"4) kill DDH app      [{fdr}]", cb_kill_ddh),
+            # '4': (f"4) kill DDH app      [{fdr}]", cb_kill_ddh),
             '5': (f"5) set graph demo    [{fgt}]", cb_graph_demo),
             '6': (f"6) check all keys    [{fdk}]", cb_print_check_all_keys),
             '7': (f"7) test GPS shield", cb_test_gps_quectel),
             '8': (f"8) test side buttons", cb_test_buttons),
-            '9': (f"9) test side buttons -> new", cb_test_buttons_new),
             'r': (f"r) run BLE range tool", cb_run_brt),
             # 'e': (f"e) edit BLE range tool", cb_edit_brt_cfg_file),
             'o': (f"o) deploy logger DOX", cb_run_deploy_dox),
             't': (f"t) deploy logger TDO", cb_run_deploy_tdo),
             'b': (f"b) detect LI loggers around", cb_run_scan_li),
-            #'u': (f"u) list Quectel USB ports", cb_list_quectel_usb_ports),
+            # 'u': (f"u) list Quectel USB ports", cb_list_quectel_usb_ports),
             's': (f"s) get cell signal quality (beta)", cb_get_csq),
             'g': (f"g) get GPS  signal quality (beta)", cb_get_gsq),
             'i': (f"i) ~ see issues ~", cb_ddh_show_issues),

@@ -387,3 +387,7 @@
     now the lowest side button sets screen brightness to 0
     you can use the highest side button to set it back to >0 values
 
+4.0.86 March 21, 2025
+
+    DDC option 'g' now gives you more information and also resets at start
+
