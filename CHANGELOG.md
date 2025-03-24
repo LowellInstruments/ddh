@@ -392,4 +392,7 @@
     DDC option 'g' now gives you more information and also resets at start
     smart lock-out feature is finished but disabled by default
 
+4.0.87 March 24, 2025
+
+    added retries to try to get the ICCID of the SIM card at beginning of run
 
