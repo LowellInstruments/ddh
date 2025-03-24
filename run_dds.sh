@@ -83,15 +83,23 @@ QUECTEL_USB_CTL=$(cat /tmp/usb_quectel_ctl)
 
 # detect cell shield SIM ID and write it to file
 if [ "${QUECTEL_USB_CTL}" ]; then
-    _pb "DDS query Quectel cell shield for SIM ID on $QUECTEL_USB_CTL"
-    rm "$LI_FILE_ICCID" > /dev/null 2>&1
-    echo -ne "AT+QCCID\r" > "$QUECTEL_USB_CTL" && \
-    sleep 0.1 && timeout 1 cat -v < "$QUECTEL_USB_CTL" | grep QCCID > "$LI_FILE_ICCID"
-    # when file is empty, try again
     if [ ! -s "$LI_FILE_ICCID" ]; then
-        _pb "re-try, DDS query Quectel cell shield for SIM ID on $QUECTEL_USB_CTL"
-        echo -ne "AT+QCCID\r" > "$QUECTEL_USB_CTL" && \
-        sleep 0.1 && timeout 1 cat -v < "$QUECTEL_USB_CTL" | grep QCCID > "$LI_FILE_ICCID"
+        # the file is zero
+        rm "$LI_FILE_ICCID" > /dev/null 2>&1
+    fi
+    if [ ! -f "$LI_FILE_ICCID" ]; then
+        # the file does not exist
+        for idx_iccid in {1..5}
+        do
+            _pb "DDS query Quectel SIM ID on $QUECTEL_USB_CTL, attempt #$idx_iccid"
+            echo -ne "AT+QCCID\r" > "$QUECTEL_USB_CTL"
+            sleep 0.1
+            timeout 1 cat -v < "$QUECTEL_USB_CTL" | grep QCCID > "$LI_FILE_ICCID"
+            if [ -s "$LI_FILE_ICCID" ]; then
+                # there is something in the file :)
+                break
+            fi
+        done
     fi
 fi
 
