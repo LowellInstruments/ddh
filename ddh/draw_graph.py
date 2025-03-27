@@ -649,22 +649,33 @@ def _graph_process_n_draw(a, r=''):
     _u(f"{STATE_DDS_BLE_DOWNLOAD_STATISTICS}/")
     is_rpi = linux_is_rpi()
     try:
+        been_water = False
+
         if met == 'TDO':
             if (not is_rpi) or (is_rpi and r == 'BLE'):
                 dp = data['Depth (fathoms) TDO']
                 dt = data['Temperature (F) TDO']
+
                 # calculate 80th percentile to ensure bottom sea values
                 p80 = _percentile(dp, 80)
+                lg.a(f'debug: percentile 80 for TDO data is {p80}')
+
                 ls_p, ls_t = [], []
                 for i, p in enumerate(dp):
                     if p >= p80:
+                        been_water = True
                         ls_p.append(dp[i])
                         ls_t.append(dt[i])
-                lg.a(f'debug: percentile 80 for TDO data is {p80}')
-                s = 'haul summary\n'
-                s += f'{t1}\n{t2}\n'
-                s += '{:5.2f} fathoms\n'.format(np.nanmean(ls_p))
-                s += '{:5.2f} °F'.format(np.nanmean(ls_t))
+
+                if been_water:
+                    s = 'haul summary TDO\n'
+                    s += f'{t1}\n{t2}\n'
+                    s += '{:5.2f} fathoms\n'.format(np.nanmean(ls_p))
+                    s += '{:5.2f} °F'.format(np.nanmean(ls_t))
+                else:
+                    s = 'haul summary TDO\n'
+                    s += f'{t1}\n{t2}\n'
+                    s += '(not available)'
                 _u(f"{STATE_DDS_BLE_DOWNLOAD_STATISTICS}/{s}")
 
         if met == 'DO':
@@ -677,17 +688,27 @@ def _graph_process_n_draw(a, r=''):
                     lg.a('debug: filtering DO-2 data values by water %')
                     for i, w in enumerate(wat):
                         if w >= 50:
+                            been_water = True
                             ls_do.append(_do[i])
                             ls_dt.append(dt[i])
                 else:
+                    # DO-1 we always show
+                    been_water = True
                     lg.a('debug: adding all values for DO-1 data')
                     ls_do = _do
                     ls_dt = dt
-                s = 'haul summary\n'
-                s += f'{t1}\n{t2}\n'
-                s += '{:5.2f} mg_l\n'.format(np.nanmean(ls_do))
-                s += '{:5.2f} °F'.format(np.nanmean(ls_dt))
+
+                if been_water:
+                    s = 'haul summary oxygen\n'
+                    s += f'{t1}\n{t2}\n'
+                    s += '{:5.2f} mg_l\n'.format(np.nanmean(ls_do))
+                    s += '{:5.2f} °F'.format(np.nanmean(ls_dt))
+                else:
+                    s = 'haul summary oxygen\n'
+                    s += f'{t1}\n{t2}\n'
+                    s += '(not available)'
                 _u(f"{STATE_DDS_BLE_DOWNLOAD_STATISTICS}/{s}")
+
     except (Exception, ) as ex:
         lg.a(f'warning: exception {ex} while doing summary box')
 

@@ -396,3 +396,7 @@
 
     added retries to try to get the ICCID of the SIM card at beginning of run
 
+4.0.88 March 25, 2025
+
+    added possibility of not-available data on Summary box on DOX and TDO loggers
+
