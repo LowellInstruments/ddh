@@ -187,9 +187,6 @@ if __name__ == '__main__':
     #     print(f'doing file {i} / {len(ff)} {_f}')
     #     DataConverter(_f, parameters).convert()
 
-    fol = '/home/kaz/Downloads/2412771 TDO'
-    ff = glob.glob(f"{fol}/*.lid")
-    print(ff)
-    for f in ff:
-        convert_lix_file(f, more_columns=True)
+    f = '/home/kaz/Downloads/2222222_TST_20250327_153432.lid'
+    convert_lix_file(f, more_columns=True)
 
