@@ -400,3 +400,8 @@
 
     added possibility of not-available data on Summary box on DOX and TDO loggers
 
+4.0.89 April 22, 2025
+
+    updated /etc/ppp/options
+
+
