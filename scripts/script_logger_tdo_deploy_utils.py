@@ -150,8 +150,7 @@ async def ble_scan_for_tdo_loggers(t=5.0):
     _dl = []
 
     def _scan_cb(d: BLEDevice, adv_data):
-        logger_types = ["TDO", ]
-        if d.name in logger_types:
+        if d.name.startswith('TDO'):
             _dd[d.address.lower()] = adv_data.rssi
 
     try:

@@ -19,24 +19,19 @@ b3 = Button(PIN_BTN_3, pull_up=True, bounce_time=MS_1)
 
 
 def button1_pressed_cb():
-    print('.')
     time.sleep(MS_10)
-    global b1
     if b1.is_pressed:
         print('top')
 
 
 def button2_pressed_cb():
     time.sleep(MS_10)
-    global b2
     if b2.is_pressed:
         print('mid')
 
-
 def button3_pressed_cb():
     time.sleep(MS_10)
-    global b3
-    if b3.is_pressed:
+    if b1.is_pressed:
         print('low')
 
 

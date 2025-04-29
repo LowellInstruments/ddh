@@ -55,9 +55,22 @@ def _ble_is_supported_logger(s):
         "TDO",
         "TAP1"
     ]
+
+    # new naming schema to work with BLE mobile app
+    new_named_logger_types = [
+        "DO1_",
+        "DO2_",
+        "TDO_",
+    ]
+
     for t in logger_types:
         if t in s:
             return True
+
+    for t in new_named_logger_types:
+        if s.startswith(t):
+            return True
+
 
 
 async def ble_scan(macs_mon, g, _h: int, _h_desc, t=6.0):
