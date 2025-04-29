@@ -404,4 +404,12 @@
 
     updated /etc/ppp/options
 
+4.0.90 April 29, 2025
+
+    in MAT library file lix.py, added  
+            # firmware patch, mm[i] should be pointing to sensor mask
+            if mm[i] == 0:
+                break
+    makes file conversion more robust on application BIL, probably also on DDH
+
 
