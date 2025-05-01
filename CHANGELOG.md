@@ -412,4 +412,8 @@
                 break
     makes file conversion more robust on application BIL, probably also on DDH
 
+4.0.90 May 1, 2025
+
+    fixed typo on file .ddh_version, it had a "cd" string on it
+
 
