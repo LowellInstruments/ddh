@@ -428,4 +428,12 @@
 
      Discard anything between this and 4.0.90, that patch is not complete
 
+4.0.95 05/08/2025
+
+    Added MAT library condition properly in lix_tdo_v3.py
+        # debug: find old files ended poorly
+        # happened in some in cases in firmware version v4.1.23
+        if mm[i:i+5] == b'\x00\x00\x00\x00\x00':
+    Changed this CHANGELOG.md file date format.
+
 

@@ -530,5 +530,22 @@ def api_ddh_side_button_2():
     _send_ddh_udp_gui('state_dds_pressed_button2')
 
 
+def _api_get_mac_address(iface: str):
+    c = f'cat /sys/class/net/{iface}/address'
+    rv = _sh(c)
+    if rv.returncode:
+        return
+    # it is lower case e4:5f:01:66:08:23
+    return rv.stdout.decode().replace('\n', '')
+
+
+def api_get_mac_address_eth0():
+    return _api_get_mac_address('eth0')
+
+
+def api_get_mac_address_wlan0():
+    return _api_get_mac_address('wlan0')
+
+
 if __name__ == '__main__':
     api_send_email_crash()

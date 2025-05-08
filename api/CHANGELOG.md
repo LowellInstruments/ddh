@@ -33,3 +33,8 @@
 1.0.10 - March 13, 2025
 
     added DWService start / stop endpoints
+
+1.0.11 - 05/08/2025
+
+    Added network interfaces fields on INFO endpoint
+    Changed this CHANGELOG.md file date format.

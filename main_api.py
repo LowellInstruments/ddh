@@ -44,7 +44,11 @@ from api.api_utils import (
     api_get_kernel,
     api_send_email_crash,
     api_linux_is_process_running,
-    api_get_disk_capacity, api_ddh_side_button_2, api_dws_start, api_dws_stop, api_dws_status
+    api_get_disk_capacity,
+    api_ddh_side_button_2,
+    api_dws_start,
+    api_dws_stop,
+    api_dws_status, api_get_mac_address_eth0, api_get_mac_address_wlan0
 )
 from ddh.db.db_his import DbHis
 from utils.ddh_config import (
@@ -229,6 +233,8 @@ async def api_get_info():
         "api_version": _th(api_get_api_version),
         "cell_fw_ver": _th(api_get_fw_cell_version),
         "kernel": _th(api_get_kernel),
+        "mac_address_eth0": _th(api_get_mac_address_eth0),
+        "mac_address_wlan0": _th(api_get_mac_address_wlan0)
         # "commit_mat": _th(get_git_commit_mat_local),
         # "commit_ddh": _th(get_git_commit_ddh_local),
     }
