@@ -275,7 +275,7 @@ async def ble_interact_do1_or_do2(mac, info, g, h, u):
         # -------------------------
         # BLE connection done here
         # -------------------------
-        lg.a(f"debug: interacting {info} logger")
+        lg.a(f"debug: interacting {info} logger, mac {mac}")
         rv = await BleCC26X2Download.download_recipe(lc,
                                                      mac,
                                                      g,

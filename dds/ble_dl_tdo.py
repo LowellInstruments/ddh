@@ -428,7 +428,7 @@ async def ble_interact_tdo(mac, info, g, h, u):
     lc = BleCC26X2(h)
 
     try:
-        lg.a(f"debug: interacting {info} logger")
+        lg.a(f"debug: interacting {info} logger, mac {mac}")
         rv = await BleTDODownload.download_tdo_logger(lc, mac, g, notes, u)
 
     except Exception as ex:

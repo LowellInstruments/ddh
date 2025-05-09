@@ -37,7 +37,7 @@ from dds.notifications_v2 import (
 )
 from dds.state import ddh_state
 from dds.timecache import is_it_time_to, annotate_time_this_occurred, delete_all_annotations_by_mask, \
-    show_all_annotations_by_mask
+    show_all_annotations_by_mask, delete_annotation
 from mat.ble.ble_mat_utils import (
     ble_mat_systemctl_restart_bluetooth,
     ble_mat_get_antenna_type_v2
@@ -396,8 +396,6 @@ async def _ble_interact_one_logger(mac, info: str, h, g):
 
 async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
 
-    t_slo = BLE_SMART_LOCKOUT_PURGE_S
-
     for mac, model in macs_det.items():
         mac = mac.lower()
         if mac not in macs_mon:
@@ -423,6 +421,10 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
                 pre_rm=1
             )
 
+        # we don't want extra delays when doing orange macs
+        if _o:
+            delete_annotation(ev)
+
         if _b or _o:
             continue
 
@@ -432,7 +434,7 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
 
         # condition smart lock-out
         if exp_get_use_smart_lockout() == 1:
-            if is_it_time_to(ev, t_slo, annotate=False):
+            if is_it_time_to(ev, BLE_SMART_LOCKOUT_PURGE_S, annotate=False):
                 # allow BUT NO annotate, only do upon download success
                 lg.a(f'debug: smart lock-out allows logger {sn}')
             else:

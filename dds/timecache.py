@@ -15,12 +15,13 @@ def annotate_time_this_occurred(k, t, pre_rm=False):
     if t <= 0:
         return
     if pre_rm and _g_timecache.has(k):
-        delete_annotation(k)
+        _g_timecache.delete(k)
     _g_timecache.add(k, k, ttl=t)
 
 
 def delete_annotation(k):
-    _g_timecache.delete(k)
+    if _g_timecache.has(k):
+        _g_timecache.delete(k)
 
 
 def delete_all_annotations_by_mask(mask):
