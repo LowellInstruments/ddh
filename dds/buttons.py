@@ -3,7 +3,7 @@ import time
 from signal import pause
 from gpiozero import Button
 from mat.utils import linux_is_rpi
-from utils.ddh_config import exp_get_new_side_buttons
+from utils.ddh_config import exp_get_new_side_buttons, exp_get_custom_side_buttons_debounce_time
 from utils.ddh_shared import (
     send_ddh_udp_gui as _u,
     STATE_DDS_PRESSED_BUTTON_2,
@@ -16,8 +16,8 @@ from utils.ddh_shared import (
 new_or_old = 1
 
 
-TIME_LO_S = .5
 TIME_DB_S = .001
+TIME_LO_S = .5
 g_last_t = 0
 MS_100 = (1 / 10)
 MS_10 = (1 / 100)
@@ -27,14 +27,25 @@ PIN_BTN_2 = 20
 PIN_BTN_3 = 21
 
 
+# custom debounce time
+cdt = exp_get_custom_side_buttons_debounce_time()
+if cdt == 1:
+    cdt = .1
+elif cdt == 2:
+    cdt = .01
+else:
+    cdt = .001
+
+
 def _th_gpio_box_buttons():
-    if not linux_is_rpi():
-        return
+    # if not linux_is_rpi():
+    #     return
 
     if new_or_old == 1:
-        b1 = Button(PIN_BTN_1, pull_up=True, bounce_time=MS_1)
-        b2 = Button(PIN_BTN_2, pull_up=True, bounce_time=MS_1)
-        b3 = Button(PIN_BTN_3, pull_up=True, bounce_time=MS_1)
+        print(f'new buttons thread using cdt = {cdt}')
+        b1 = Button(PIN_BTN_1, pull_up=True, bounce_time=cdt)
+        b2 = Button(PIN_BTN_2, pull_up=True, bounce_time=cdt)
+        b3 = Button(PIN_BTN_3, pull_up=True, bounce_time=cdt)
     else:
         b1 = Button(PIN_BTN_1, pull_up=True, bounce_time=TIME_DB_S)
         b2 = Button(PIN_BTN_2, pull_up=True, bounce_time=TIME_DB_S)
@@ -47,6 +58,7 @@ def _th_gpio_box_buttons():
             g_last_t = t
             return True
 
+    # v0 old ones
     def b1_cb_v0():
         if _cb():
             _u(STATE_DDS_PRESSED_BUTTON_1)
@@ -58,6 +70,7 @@ def _th_gpio_box_buttons():
     def b3_cb_v0():
         pass
 
+    # v1 new ones
     def b1_cb_v1():
         time.sleep(MS_10)
         if b1.is_pressed:
@@ -92,3 +105,7 @@ def dds_create_buttons_thread():
     print(f'creating buttons thread v{new_or_old}')
     bth = threading.Thread(target=_th_gpio_box_buttons)
     bth.start()
+
+
+if __name__ == '__main__':
+    dds_create_buttons_thread()

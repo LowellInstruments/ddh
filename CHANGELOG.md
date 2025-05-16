@@ -445,4 +445,8 @@
 4.0.96 05/16/2025
 
     Added 'fixed5min' mode to tab "Advanced", dropdown "TDO profiling"
+    Added support for key custom_side_buttons_debounce_time in [experimental] config.toml section
+        - when = 1, button debounce time will be .1
+        - when = 2, button debounce time will be .01
+        - in any other case, or if key not present, will be the default .001
 

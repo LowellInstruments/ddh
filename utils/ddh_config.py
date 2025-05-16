@@ -326,6 +326,10 @@ def exp_get_new_side_buttons():
     return _get_exp_key_from_cfg('use_new_side_buttons')
 
 
+def exp_get_custom_side_buttons_debounce_time():
+    return _get_exp_key_from_cfg('custom_side_buttons_debounce_time')
+
+
 if __name__ == '__main__':
     print('vessel_name', dds_get_cfg_vessel_name())
     print('aws_en', dds_get_cfg_aws_en())
@@ -346,3 +350,5 @@ if __name__ == '__main__':
     print('ddh_flag_maps_en', ddh_get_cfg_maps_en())
     print('conf_dox', exp_get_conf_dox())
     print('has lowell logger', ddh_get_cfg_has_lowell_loggers())
+    print('buttons debounce time', exp_get_custom_side_buttons_debounce_time())
+
