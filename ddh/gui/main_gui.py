@@ -709,7 +709,7 @@ class DDH(QMainWindow, d_m.Ui_MainWindow):
 
         # delete the decided file
         if v == 'none':
-            for i in ('slow', 'mid', 'fast'):
+            for i in ('slow', 'mid', 'fast', 'fixed5min'):
                 pdf = f'{fol_ddh}/.decided_scf_{i}.toml'
                 if os.path.exists(pdf):
                     lg.a(f'debug: deleting {pdf}')

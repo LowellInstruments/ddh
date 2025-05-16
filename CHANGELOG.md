@@ -442,4 +442,7 @@
     
     - Changed this CHANGELOG.md file date format.
 
+4.0.96 05/16/2025
+
+    Added 'fixed5min' mode to tab "Advanced", dropdown "TDO profiling"
 

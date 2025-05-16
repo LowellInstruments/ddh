@@ -68,7 +68,7 @@ class BleTDODownload:
         # check we want to load a dynamic SCF file
         d_prf_file = {}
         fol_ddh = f'{ddh_get_folder_path_scripts()}/..'
-        for i in ('slow', 'mid', 'fast'):
+        for i in ('slow', 'mid', 'fast', 'fixed5min'):
             pdf = f'{fol_ddh}/.decided_scf_{i}.toml'
             if os.path.exists(pdf):
                 lg.a(f'loading SCF file {os.path.basename(pdf)}')

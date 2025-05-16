@@ -262,7 +262,7 @@ def gui_setup_view(my_win):
         a.cb_skip_in_port.setCurrentIndex(1)
 
     # advanced tab SCF dropdown
-    a.cbox_scf.addItems(['none', 'slow', 'mid', 'fast'])
+    a.cbox_scf.addItems(['none', 'slow', 'mid', 'fast', 'fixed5min'])
 
     # advanced tab graphs include out of water data
     if os.path.exists(LI_PATH_PLT_ONLY_INSIDE_WATER):
