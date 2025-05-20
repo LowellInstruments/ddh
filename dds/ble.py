@@ -450,7 +450,9 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
         # show the position of the logger we will download
         gps_utils_log_position_logger(g)
 
+        # -------------------------------------------------------
         # will YES interact with ONE logger of the scanned ones
+        # -------------------------------------------------------
         return await _ble_interact_one_logger(mac, model, _h, g)
 
 
