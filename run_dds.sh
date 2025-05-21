@@ -19,17 +19,25 @@ check_already_running "main_dds_controller"
 
 
 # start with a clean BLE sheet
-_pb "DDS delete BLE cache"
-grep 'ble_del_cache = 1' "$FOL_DDH"/settings/config.toml
-rv=$?
-if [ $rv -eq 0 ]; then
-    _pb "* EXP * removing cache from /etc/bluetooth/main.conf"
-    LS_HCI_MACS=$(hciconfig -a | grep "BD Address" | cut -d " " -f 3)
-    for HM in $LS_HCI_MACS; do sudo rm "/var/lib/bluetooth/$HM"/cache/*; done
-    sudo sed -i '/#Cache = always/c\Cache = no' /etc/bluetooth/main.conf
-    sudo systemctl restart bluetooth
-    sleep 1
-fi
+_pb "DDS BLE disabling cache from /etc/bluetooth/main.conf"
+sudo sed -i '/#Cache = always/c\Cache = no' /etc/bluetooth/main.conf
+
+
+
+_pb "DDS BLE delete /var cache entries"
+LS_HCI_MACS=$(hciconfig -a | grep "BD Address" | cut -d " " -f 3)
+for HM in $LS_HCI_MACS; do sudo rm "/var/lib/bluetooth/$HM"/cache/*; done
+
+
+_pb "DDS BLE resetting interfaces"
+sudo hciconfig hci0 reset 2> /dev/null || _py "cannot reset hci0"
+sudo hciconfig hci1 reset 2> /dev/null || _py "cannot reset hci1"
+
+
+
+_pb "DDS BLE restarting system service"
+sudo systemctl restart bluetooth
+sleep 2
 
 
 
