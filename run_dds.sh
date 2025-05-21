@@ -30,13 +30,13 @@ for HM in $LS_HCI_MACS; do sudo rm "/var/lib/bluetooth/$HM"/cache/*; done
 
 
 
-_pb "DDS BLE resetting interfaces"
+_pb "DDS BLE resetting HCI interfaces"
 sudo hciconfig hci0 reset 2> /dev/null || _py "cannot reset hci0"
 sudo hciconfig hci1 reset 2> /dev/null || _py "cannot reset hci1"
 
 
 
-_pb "DDS BLE restarting system service"
+_pb "DDS BLE restarting systemctl service"
 sudo systemctl restart bluetooth
 sleep 2
 
@@ -51,8 +51,16 @@ sudo hciconfig hci1 up 2> /dev/null || _py "cannot UP hci1"
 _pb "DDS BLE check at least 1 interface OK"
 (hciconfig hci0 | grep RUNNING) &> /dev/null; rv0=$?
 (hciconfig hci1 | grep RUNNING) &> /dev/null; rv1=$?
-if [ $rv0 -ne 0 ]; then _py "hci0 not present"; fi
-if [ $rv1 -ne 0 ]; then _py "hci1 not present"; fi
+if [ $rv0 -ne 0 ]; then
+  _py "hci0 not present"
+else
+  _pg "hci0 is up"
+fi
+if [ $rv1 -ne 0 ]; then
+  _py "hci1 not present"
+else
+  _pg "hci1 is up"
+fi
 if [ $rv0 -ne 0 ] && [ $rv1 -ne 0 ]; then
     _pr "error: DDS needs at least 1 Bluetooth interface"
     exit 1
@@ -105,7 +113,7 @@ if [ "${QUC}" ]; then
             sleep 0.1
             timeout 1 cat -v < "$QUC" | grep QCCID > "$LI_FILE_ICCID"
             if [ -s "$LI_FILE_ICCID" ]; then
-                # there is something in the file :)
+                # there is definitely something in the file :)
                 break
             fi
         done
