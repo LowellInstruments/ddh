@@ -13,7 +13,7 @@ from dds.state import state_ble_init_rv_notes, state_ble_logger_ccx26x2r_needs_a
 from mat.ble.ble_mat_utils import (
     ble_mat_crc_local_vs_remote,
     DDH_GUI_UDP_PORT,
-    ble_mat_disconnect_all_devices_ll,
+    ble_mat_detect_devices_left_connected_ll,
 )
 from mat.ble.bleak.cc26x2r import BleCC26X2
 from mat.utils import linux_is_rpi
@@ -444,7 +444,7 @@ async def ble_interact_tdo(mac, info, g, h, u):
 # test
 # ------
 if __name__ == "__main__":
-    ble_mat_disconnect_all_devices_ll()
+    ble_mat_detect_devices_left_connected_ll()
     # we currently in 'ddh/dds'
     os.chdir('')
     _m = "D0:2E:AB:D9:29:48"

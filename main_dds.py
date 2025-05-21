@@ -13,7 +13,7 @@ from dds.ble import (
     ble_show_antenna_type,
     ble_check_antenna_up_n_running,
     ble_op_conditions_met,
-    ble_show_monitored_macs
+    ble_show_monitored_macs, ble_reset_antenna
 )
 from dds.ble_scan import ble_scan
 from dds.cnv import cnv_serve
@@ -46,9 +46,9 @@ from mat.linux import (
     linux_is_process_running
 )
 from mat.ble.ble_mat_utils import (
-    ble_mat_disconnect_all_devices_ll,
+    ble_mat_detect_devices_left_connected_ll,
     ble_mat_get_antenna_type_v2,
-    ble_mat_get_bluez_version
+    ble_mat_get_bluez_version, ble_mat_systemctl_restart_bluetooth
 )
 from mat.utils import linux_is_rpi
 from utils.ddh_config import (
@@ -120,7 +120,18 @@ def main_dds():
 
     ble_show_monitored_macs()
     apply_debug_hooks()
-    ble_mat_disconnect_all_devices_ll()
+    nlc = ble_mat_detect_devices_left_connected_ll()
+    if nlc:
+        lg.a(f"warning: detected {nlc} devices left connected")
+        if linux_is_rpi():
+            lg.a("warning: starting hci0 reset")
+            ble_reset_antenna(0)
+            lg.a("warning: starting hci1 reset")
+            ble_reset_antenna(1)
+            lg.a("warning: resetting bluetooth service")
+            ble_mat_systemctl_restart_bluetooth()
+            time.sleep(3)
+
 
     # seems boot process is going well
     setproctitle.setproctitle(NAME_EXE_DDS)
@@ -172,6 +183,9 @@ def main_dds():
     if dds_get_cfg_flag_download_test_mode():
         lg.a('detected DDH download test mode')
 
+    # contains the return value of the BLE interaction
+    rvi = 0
+
     # =============
     # main loop
     # =============
@@ -204,8 +218,35 @@ def main_dds():
 
         # check we do Bluetooth or not
         ble_show_antenna_type(h, h_d)
-        if not ble_check_antenna_up_n_running(g, h):
-            # note: ensure 'hciconfig' command is installed
+
+        # BLE system check
+        brr = ddh_state.state_get_ble_reset_req()
+        aur = ble_check_antenna_up_n_running(g, h)
+        nlc = ble_mat_detect_devices_left_connected_ll()
+        if rvi or brr or nlc or (not aur):
+            if rvi:
+                lg.a("warning: last interaction had BLE error")
+            if brr:
+                # happens on scan errors or required by some BLE dongles
+                lg.a("warning: detected ble_reset_req flag")
+                ddh_state.state_clr_ble_reset_req()
+            if not aur:
+                lg.a(f"warning: hci{h} is NOT up and running")
+            if nlc:
+                lg.a(f"warning: detected {nlc} devices left connected")
+            if linux_is_rpi():
+                lg.a("warning: starting hci0 reset")
+                ble_reset_antenna(0)
+                lg.a("warning: starting hci1 reset")
+                ble_reset_antenna(1)
+                lg.a("warning: resetting bluetooth service")
+                ble_mat_systemctl_restart_bluetooth()
+                time.sleep(3)
+
+
+        # check again
+        aur = ble_check_antenna_up_n_running(g, h)
+        if not aur:
             continue
 
         # check operation conditions are met
@@ -229,11 +270,6 @@ def main_dds():
         # poor semaphore
         ddh_state.state_clr_downloading_ble()
 
-        # recovery situations
-        if rvi:
-            lg.a("warning: disconnect all BLE devices due to error, set ble_reset_req")
-            ble_mat_disconnect_all_devices_ll()
-            ddh_state.state_set_ble_reset_req()
 
 
 def dds_tell_software_was_just_updated():

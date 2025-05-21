@@ -146,6 +146,6 @@ async def ble_scan(macs_mon, g, _h: int, _h_desc, t=6.0):
 
     except (asyncio.TimeoutError, BleakError, OSError) as ex:
         lg.a(f"ble_scan() hardware error on {ad} -> {ex}")
-        lg.a('warning: setting state_set_ble_reset_req = 1')
+        lg.a('debug: setting state_set_ble_reset_req = 1 in function ble_scan')
         ddh_state.state_set_ble_reset_req()
         return {}

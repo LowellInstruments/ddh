@@ -355,7 +355,7 @@ async def _ble_interact_one_logger(mac, info: str, h, g):
     _, antenna_type_str = ble_mat_get_antenna_type_v2()
     if antenna_type_str == 'external' and linux_is_rpi():
         # some BLE dongles need a reset after download
-        lg.a('debug: planned reset of BLE dongle')
+        lg.a('debug: setting state_set_ble_reset_req = 1 as planned reset')
         ddh_state.state_set_ble_reset_req()
 
     # on GUI, all times are local, we don't use UTC on GUI
@@ -537,18 +537,7 @@ def ble_show_antenna_type(_h, desc):
 
 def ble_check_antenna_up_n_running(g, h: int):
 
-    # maybe we were asked to reset the interfaces
-    if ddh_state.state_get_ble_reset_req():
-        ddh_state.state_clr_ble_reset_req()
-        for i in range(2):
-            if linux_is_rpi():
-                lg.a(f"warning: hciconfig reset on hci{i} upon set_ble_reset_req")
-                cr = f"sudo hciconfig hci{i} reset"
-                sp.run(cr, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
-            else:
-                lg.a(f"non-rpi CANNOT hciconfig reset on hci{i}")
-
-    # read the interfaces state
+    # for up to 10 seconds, read the BLE interfaces state
     for i in range(10):
         cr = f"hciconfig hci{h} | grep 'UP RUNNING'"
         rv = sp.run(cr, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
@@ -556,7 +545,7 @@ def ble_check_antenna_up_n_running(g, h: int):
             return True
         time.sleep(1)
 
-    # know the error so re-run this
+    # display the error
     # cr = f"hciconfig hci{h}"
     # rv = sp.run(cr, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     # lg.a(f'debug: out stream BLE {rv.stdout}')
@@ -572,9 +561,7 @@ def ble_check_antenna_up_n_running(g, h: int):
         lg.a(e.format(e))
         notify_ddh_error_hw_ble(g)
 
-    # cannot do sudo <command> on laptop for next instruction
-    if not linux_is_rpi():
-        return
 
-    lg.a('error: restarting BLE service')
-    ble_mat_systemctl_restart_bluetooth()
+def ble_reset_antenna(h: int):
+    c = f"sudo hciconfig hci{h} reset"
+    sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)

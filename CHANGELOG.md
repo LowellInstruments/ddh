@@ -454,3 +454,7 @@
 
     using new MAT library function ble_mat_disconnect_all_devices_ll()
 
+4.0.98 05/21/25
+
+    improved BLE system health check
+    using newer bleak library 0.22.3 instead of 0.21.1

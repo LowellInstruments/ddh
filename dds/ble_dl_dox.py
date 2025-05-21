@@ -14,7 +14,7 @@ from dds.state import (
 )
 from mat.ble.ble_mat_utils import (
     ble_mat_crc_local_vs_remote,
-    DDH_GUI_UDP_PORT, ble_mat_disconnect_all_devices_ll,
+    DDH_GUI_UDP_PORT, ble_mat_detect_devices_left_connected_ll,
 )
 from mat.ble.bleak.cc26x2r import BleCC26X2
 from utils.ddh_config import (
@@ -296,7 +296,7 @@ async def ble_interact_do1_or_do2(mac, info, g, h, u):
 # ------
 if __name__ == "__main__":
     # we currently in 'ddh/dds'
-    ble_mat_disconnect_all_devices_ll()
+    ble_mat_detect_devices_left_connected_ll()
     os.chdir('..')
     _m = "60:77:71:22:CA:6A"
     _i = "DO-2"
