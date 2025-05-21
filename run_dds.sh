@@ -29,6 +29,7 @@ LS_HCI_MACS=$(hciconfig -a | grep "BD Address" | cut -d " " -f 3)
 for HM in $LS_HCI_MACS; do sudo rm "/var/lib/bluetooth/$HM"/cache/*; done
 
 
+
 _pb "DDS BLE resetting interfaces"
 sudo hciconfig hci0 reset 2> /dev/null || _py "cannot reset hci0"
 sudo hciconfig hci1 reset 2> /dev/null || _py "cannot reset hci1"
@@ -41,13 +42,13 @@ sleep 2
 
 
 
-_pb "DDS set BLE interfaces UP"
+_pb "DDS BLE bring interfaces UP"
 sudo hciconfig hci0 up 2> /dev/null || _py "cannot UP hci0"
 sudo hciconfig hci1 up 2> /dev/null || _py "cannot UP hci1"
 
 
 
-_pb "DDS check at least 1 BLE interface OK"
+_pb "DDS BLE check at least 1 interface OK"
 (hciconfig hci0 | grep RUNNING) &> /dev/null; rv0=$?
 (hciconfig hci1 | grep RUNNING) &> /dev/null; rv1=$?
 if [ $rv0 -ne 0 ]; then _py "hci0 not present"; fi
@@ -59,7 +60,7 @@ fi
 
 
 
-_pb "DDS set BLE connection supervision timeout"
+_pb "DDS BLE set connection supervision timeout"
 touch /tmp/200
 echo '200' | sudo tee /sys/kernel/debug/bluetooth/hci0/supervision_timeout 2> /dev/null
 echo '200' | sudo tee /sys/kernel/debug/bluetooth/hci1/supervision_timeout 2> /dev/null
@@ -85,12 +86,12 @@ source "$FOL_VEN"/bin/activate
 
 _pb "DDS run main_qus.py to auto-detect Quectel shield USB ports"
 cd "$FOL_DDH" && "$FOL_VEN"/bin/python main_qus.py
-QUECTEL_USB_CTL=$(cat /tmp/usb_quectel_ctl)
+QUC=$(cat /tmp/usb_quectel_ctl)
 
 
 
 # detect cell shield SIM ID and write it to file
-if [ "${QUECTEL_USB_CTL}" ]; then
+if [ "${QUC}" ]; then
     if [ ! -s "$LI_FILE_ICCID" ]; then
         # the file is zero
         rm "$LI_FILE_ICCID" > /dev/null 2>&1
@@ -99,10 +100,10 @@ if [ "${QUECTEL_USB_CTL}" ]; then
         # the file does not exist
         for idx_iccid in {1..5}
         do
-            _pb "DDS query Quectel SIM ID on $QUECTEL_USB_CTL, attempt #$idx_iccid"
-            echo -ne "AT+QCCID\r" > "$QUECTEL_USB_CTL"
+            _pb "DDS query Quectel SIM ID on $QUC, attempt #$idx_iccid"
+            echo -ne "AT+QCCID\r" > "$QUC"
             sleep 0.1
-            timeout 1 cat -v < "$QUECTEL_USB_CTL" | grep QCCID > "$LI_FILE_ICCID"
+            timeout 1 cat -v < "$QUC" | grep QCCID > "$LI_FILE_ICCID"
             if [ -s "$LI_FILE_ICCID" ]; then
                 # there is something in the file :)
                 break
