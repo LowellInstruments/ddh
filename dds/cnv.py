@@ -187,6 +187,6 @@ if __name__ == '__main__':
     #     print(f'doing file {i} / {len(ff)} {_f}')
     #     DataConverter(_f, parameters).convert()
 
-    f = '/home/kaz/Downloads/2412774_TST_20241219_184143.lid'
+    f = '/home/kaz/Downloads/2504720_LAB_20250520_211615.lid'
     convert_lix_file(f, more_columns=True, verbose=1)
 

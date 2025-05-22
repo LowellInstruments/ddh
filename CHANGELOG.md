@@ -457,4 +457,5 @@
 4.0.98 05/21/25
 
     improved BLE system health check
-    using newer bleak library 0.22.3 instead of 0.21.1
+    using newer bleak library 0.22.3 instead of 0.21.1 to solve this bug
+        https://github.com/hbldh/bleak/issues/1489
