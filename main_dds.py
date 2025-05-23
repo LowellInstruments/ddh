@@ -17,6 +17,7 @@ from dds.ble import (
 )
 from dds.ble_scan import ble_scan
 from dds.cnv import cnv_serve
+from dds.dds_wdog import dds_wdog, dds_feed_watchdog
 from dds.gpq import GpqW
 from dds.hooks import apply_debug_hooks
 from dds.macs import (
@@ -55,7 +56,7 @@ from utils.ddh_config import (
     dds_check_cfg_has_box_info,
     dds_get_cfg_monitored_macs,
     dds_check_config_file,
-    dds_get_cfg_flag_download_test_mode,
+    dds_get_cfg_flag_download_test_mode, exp_get_use_new_dds_watchdog,
 )
 from utils.ddh_shared import (
     PID_FILE_DDS,
@@ -103,6 +104,7 @@ def main_dds():
         _u(f"bad_conf/{rv}")
         os._exit(1)
 
+    dds_feed_watchdog()
     dds_create_buttons_thread()
     dds_tell_software_was_just_updated()
     dds_check_cfg_has_box_info()
@@ -147,6 +149,10 @@ def main_dds():
     # GPS clock sync at boot, remain here until successful
     _skip_notification_gps_sync_boot_error = 1
     while not gps_utils_did_we_ever_clock_sync():
+
+        # so watchdog does not complain
+        dds_feed_watchdog()
+
         g = gps_measure()
         if g:
             lat, lon, tg, speed = g
@@ -191,6 +197,9 @@ def main_dds():
     # =============
     while 1:
 
+        # so watchdog does not complain
+        dds_feed_watchdog()
+
         # tell GUI
         gps_utils_tell_vessel_name()
 
@@ -201,6 +210,9 @@ def main_dds():
         aws_sync_or_cp()
         sqs_serve()
         net_serve()
+
+        # so watchdog does not complain
+        dds_feed_watchdog()
 
         # GPS stage
         g = gps_measure()
@@ -255,6 +267,9 @@ def main_dds():
 
         # moving this here allows for way lighter GPQ files
         _g_gpw.add(tg, lat, lon)
+
+        # so watchdog does not complain
+        dds_feed_watchdog()
 
         # poor semaphore
         ddh_state.state_set_downloading_ble()
@@ -318,14 +333,29 @@ def controller_main_dds():
          f'&& echo "kill loose DDS" && killall {ne} && sleep 3')
     sp.run(c, shell=True)
 
+    # controller main code
     while 1:
-        # GUI KILLs this process when desired
         lg.a(f"=== {s} launching child ===")
         p = Process(target=main_dds)
         p.start()
-        p.join()
-        _alarm_dds_crash(p.exitcode)
-        lg.a(f"=== {s} waits child, exitcode {p.exitcode} ===")
+
+        if exp_get_use_new_dds_watchdog() == 1:
+            lg.a('watchdog DDS: using new version')
+            rv = dds_wdog()
+            if rv == 1:
+                lg.a(f'DDS watchdog event: detected {NAME_EXE_DDS} not alive')
+            elif rv == 2:
+                lg.a(f'DDS watchdog event: detected {NAME_EXE_DDS} unresponsive')
+            else:
+                lg.a(f'warning: DDS watchdog returned {rv}, not expected')
+
+        else:
+            lg.a('watchdog DDS: using old version')
+            p.join()
+            rv = p.exitcode
+
+        _alarm_dds_crash(rv)
+        lg.a(f"=== {s} waits child, exitcode {rv} ===")
         time.sleep(5)
 
 

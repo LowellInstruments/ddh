@@ -4,7 +4,13 @@ import os
 DOG_GUI = '/dev/shm/dog_gui.txt'
 
 
+# ---------------------------
+# a watchdog for the DDH GUI
+# ---------------------------
+
+
 def gui_dog_clear():
+    # fresh start
     if os.path.exists(DOG_GUI):
         os.unlink(DOG_GUI)
 

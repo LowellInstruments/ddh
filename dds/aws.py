@@ -319,7 +319,7 @@ def _aws_s3_cp_process(ls):
 
         # build the AWS command
         c = (
-            f"AWS_ACCESS_KEY_ID={_k} AWS_SECRET_ACCESS_KEY={_s} "
+            f"timeout 60 AWS_ACCESS_KEY_ID={_k} AWS_SECRET_ACCESS_KEY={_s} "
             f"{_bin} s3 cp {path} s3://{_n}/{um}/{f_bn} {dr} "
         )
 
@@ -392,7 +392,7 @@ def aws_cp():
     p.start()
 
 
-def aws_sync_or_cp():
+def _aws_sync_or_cp():
     period_aws_cp_secs = 86400
     k = 'run_aws_cp'
     flag_gui = dds_get_aws_has_something_to_do_via_gui_flag_file()
@@ -469,6 +469,13 @@ def aws_sync_or_cp():
         aws_cp()
         annotate_time_this_occurred(k, period_aws_cp_secs)
         return
+
+
+def aws_sync_or_cp():
+    try:
+        return _aws_sync_or_cp()
+    except (Exception, ) as ex:
+        lg.a(f'error: aws_sync_or_cp -> {ex}')
 
 
 # test

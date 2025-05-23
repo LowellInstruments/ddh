@@ -58,3 +58,4 @@ ble_del_cache = 0
 use_smart_lockout = 0
 use_new_side_buttons = 0
 # custom_side_buttons_debounce_time = 2
+use_new_dds_watchdog = 0

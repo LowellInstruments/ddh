@@ -11,6 +11,12 @@ _g_timecache = Cache(
 )
 
 
+
+def time_cache_get_keys_length():
+    n = len(_g_timecache.keys())
+    print(f'used keys {n} / {TIM_CACHE_MAX_SIZE}')
+
+
 def annotate_time_this_occurred(k, t, pre_rm=False):
     if t <= 0:
         return
