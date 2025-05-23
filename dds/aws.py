@@ -319,8 +319,8 @@ def _aws_s3_cp_process(ls):
 
         # build the AWS command
         c = (
-            f"timeout 60 AWS_ACCESS_KEY_ID={_k} AWS_SECRET_ACCESS_KEY={_s} "
-            f"{_bin} s3 cp {path} s3://{_n}/{um}/{f_bn} {dr} "
+            f"AWS_ACCESS_KEY_ID={_k} AWS_SECRET_ACCESS_KEY={_s} "
+            f"timeout 60 {_bin} s3 cp {path} s3://{_n}/{um}/{f_bn} {dr} "
         )
 
         # run AWS cp command
