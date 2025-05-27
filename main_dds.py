@@ -133,6 +133,8 @@ def main_dds():
             lg.a("warning: resetting bluetooth service")
             ble_mat_systemctl_restart_bluetooth()
             time.sleep(3)
+            h, h_d = ble_mat_get_antenna_type_v2()
+            ble_show_antenna_type(h, h_d)
 
 
     # seems boot process is going well
@@ -255,6 +257,7 @@ def main_dds():
                 ble_mat_systemctl_restart_bluetooth()
                 time.sleep(3)
                 h, h_d = ble_mat_get_antenna_type_v2()
+                ble_show_antenna_type(h, h_d)
 
         # check again
         aur = ble_check_antenna_up_n_running(g, h)
