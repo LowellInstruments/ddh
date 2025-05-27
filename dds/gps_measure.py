@@ -42,6 +42,7 @@ from utils.logs import lg_gps as lg
 _g_ts_cached_gps_valid_for = 0
 _g_cached_gps = None
 _g_banner_cache_too_old = 0
+_skip_satellite_notification = 1
 
 
 # pu_gps: port USB gps for Quectel shields
@@ -365,8 +366,13 @@ def _gps_measure():
     global _g_cached_gps
 
     # number of satellites notification
+    global _skip_satellite_notification
     if 0 < ns <= 6 and is_it_time_to('SQS_gps_num_satellites', PERIOD_GPS_NOTI_NUM_GPS_SAT):
-        notify_ddh_number_of_gps_satellites(ns)
+        if _skip_satellite_notification:
+            # Nick wanted to skip the first one
+            _skip_satellite_notification = 0
+        else:
+            notify_ddh_number_of_gps_satellites(ns)
 
     # OK frame
     if g:
