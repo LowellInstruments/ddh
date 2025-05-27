@@ -464,3 +464,7 @@
 
     introduced new watchdog for DDS, disabled by default
     introduced "timeout 60" in front of AWS single copy files in aws.py, function _aws_s3_cp_process()
+
+4.1.00 05/27/25
+
+    fixed typo in script_test_box_buttons.py which made last button (lowest) not to work

@@ -31,7 +31,7 @@ def button2_pressed_cb():
 
 def button3_pressed_cb():
     time.sleep(MS_10)
-    if b1.is_pressed:
+    if b3.is_pressed:
         print('low')
 
 
