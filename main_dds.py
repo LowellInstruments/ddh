@@ -239,7 +239,7 @@ def main_dds():
             if rvi:
                 lg.a("warning: last interaction had BLE error")
             if brr:
-                # happens on scan errors or required by some BLE dongles
+                # on scan errors + required by some BLE dongles
                 lg.a("warning: detected ble_reset_req flag")
                 ddh_state.state_clr_ble_reset_req()
             if not aur:
@@ -254,7 +254,7 @@ def main_dds():
                 lg.a("warning: resetting bluetooth service")
                 ble_mat_systemctl_restart_bluetooth()
                 time.sleep(3)
-
+                h, h_d = ble_mat_get_antenna_type_v2()
 
         # check again
         aur = ble_check_antenna_up_n_running(g, h)

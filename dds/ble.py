@@ -355,7 +355,7 @@ async def _ble_interact_one_logger(mac, info: str, h, g):
     _, antenna_type_str = ble_mat_get_antenna_type_v2()
     if antenna_type_str == 'external' and linux_is_rpi():
         # some BLE dongles need a reset after download
-        lg.a('debug: setting state_set_ble_reset_req = 1 as planned reset')
+        lg.a('warning: setting state_set_ble_reset_req = 1 as planned reset')
         ddh_state.state_set_ble_reset_req()
 
     # on GUI, all times are local, we don't use UTC on GUI
@@ -565,3 +565,4 @@ def ble_check_antenna_up_n_running(g, h: int):
 def ble_reset_antenna(h: int):
     c = f"sudo hciconfig hci{h} reset"
     sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+    time.sleep(1)
