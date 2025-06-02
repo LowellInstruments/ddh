@@ -468,3 +468,8 @@
 4.1.00 05/27/25
 
     fixed typo in script_test_box_buttons.py which made last button (lowest) not to work
+
+4.1.01 06/02/2025
+
+    we no longer send both BOOT and ALIVE notifications at the same time when booting
+    

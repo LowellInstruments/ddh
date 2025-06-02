@@ -150,6 +150,7 @@ def main_dds():
 
     # GPS clock sync at boot, remain here until successful
     _skip_notification_gps_sync_boot_error = 1
+    ts_notify_boot = 0
     while not gps_utils_did_we_ever_clock_sync():
 
         # so watchdog does not complain
@@ -161,6 +162,7 @@ def main_dds():
             if gps_utils_clock_sync_if_so(tg):
                 gps_utils_show_gps_clock_sync()
                 notify_boot(g)
+                ts_notify_boot = time.perf_counter()
                 break
         if is_it_time_to('report_gps_sync_boot_error', 1800):
             if _skip_notification_gps_sync_boot_error == 0:
@@ -227,8 +229,9 @@ def main_dds():
         dds_log_tracking_add(lat, lon, tg)
         gps_utils_clock_sync_if_so(tg)
 
-        # send SQS ping
-        notify_ddh_alive(g)
+        # send SQS alive, skip it when booting
+        if time.perf_counter() > ts_notify_boot + 3700:
+            notify_ddh_alive(g)
 
         # check we do Bluetooth or not
         ble_show_antenna_type(h, h_d)

@@ -224,9 +224,19 @@ def utils_graph_fetch_csv_data(
             if not os.path.exists(_gfm_build_filename_no_wc(i))
         ]
 
+    # set them back
+    _g_ff_tdo = _g_ff_tdo_wc
+    _g_ff_dot = _g_ff_dot_wc
+
     # debug: show them
     # for i in _g_ff_tdo:
         # print(os.path.basename(i), os.path.getsize(i))
+
+    # better GUI messages
+    if n_tdo_pre_test and not _g_ff_tdo and not ddh_do_we_graph_out_of_water_data():
+        e = f'error: all data for {basename(fol)} is out of water'
+        lg.a(e)
+        return {'error': e}
 
     # fast leaving case for TDO loggers
     if n_tdo_pre_test and not _g_ff_tdo:
