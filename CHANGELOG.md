@@ -469,7 +469,12 @@
 
     fixed typo in script_test_box_buttons.py which made last button (lowest) not to work
 
-4.1.01 06/02/2025
+4.1.01 06/02/25
 
     we no longer send both BOOT and ALIVE notifications at the same time when booting
+
+4.1.02 06/05/25
+
+    improved GUI watchdog on main_ddh.py
+
     

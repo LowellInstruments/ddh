@@ -5,6 +5,7 @@ import time
 from multiprocessing import Process
 from PyQt5.QtWidgets import QApplication
 from ddh.gui.main_gui import DDH, on_ctrl_c
+from dds.notifications_v2 import notify_error_sw_crash
 from mat.linux import (
     linux_app_write_pid_to_tmp,
     linux_is_process_running
@@ -23,6 +24,10 @@ import setproctitle
 from utils.logs import lg_gui as lg
 from utils.wdog import gui_dog_get
 import subprocess as sp
+
+
+GUI_WD_EXPIRE_SECS = 60
+GUI_WD_START_SECS = 180
 
 
 def main_ddh():
@@ -70,17 +75,24 @@ def controller_main_ddh():
         time.sleep(5)
         v = gui_dog_get()
         kill = 0
+        kill_by_wd = 0
         if os.path.exists(f):
             os.unlink(f)
             lg.a(f"=== debug: user closed {s} ===")
             kill = 1
-        if v > 30 and time.perf_counter() > v + 30:
+        if v > GUI_WD_START_SECS and time.perf_counter() > v + GUI_WD_EXPIRE_SECS:
             # detects hangs of child GUI
             lg.a(f"=== {s} debug: {time.perf_counter()}, {v} child seems crashed ===")
             kill = 1
+            kill_by_wd = 1
         if kill:
             # in this order or message does not show
             lg.a(f'debug: closing GUI, crontab will relaunch it', show_ts=0)
+
+            # would be more concerning
+            if kill_by_wd:
+                lg.a(f'warning: DDH watchdog had to intervene')
+                notify_error_sw_crash()
 
             # kills GUI + GUI controller but not DDS, crontab will relaunch them
             ddh_kill_by_pid_file()
