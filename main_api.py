@@ -254,6 +254,35 @@ async def ep_logs_get():
         return FileResponse(path=f, filename=os.path.basename(f))
 
 
+@app.get('/logs_get_with_since')
+async def ep_logs_get_with_since(start, end):
+    # start: "%Y%m%d%H%M%S"
+    vn = dds_get_cfg_vessel_name().replace(' ', '')
+    f = f'/tmp/logs_{vn}_{start}_{end}.zip'
+    d = api_get_folder_path_root()
+
+    # delete any previous ZIP file
+    c = f'rm {f}'
+    _sh(c)
+
+    # grab all logs
+    ls_dds = glob.glob(f'{d}/logs/dds_*.log')
+    ls_ddh = glob.glob(f'{d}/logs/gui_*.log')
+    ls_dds = [i for i in ls_dds if f'dds_{start}.log' <= os.path.basename(i) <= f'dds_{end}.log']
+    ls_ddh = [i for i in ls_ddh if f'gui_{start}.log' <= os.path.basename(i) <= f'gui_{end}.log']
+    ls = ls_dds + ls_ddh
+    s_ls = ' '.join(ls)
+
+    print('sls', s_ls)
+
+
+    # zip ONLY .log files
+    c = f'zip -j {f} {s_ls}'
+    rv = _sh(c)
+    if rv.returncode == 0:
+        return FileResponse(path=f, filename=os.path.basename(f))
+
+
 @app.get("/dl_files_get")
 async def ep_dl_files_get():
     vn = dds_get_cfg_vessel_name()

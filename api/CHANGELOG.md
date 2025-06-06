@@ -38,3 +38,7 @@
 
     Added network interfaces fields on INFO endpoint
     Changed this CHANGELOG.md file date format.
+
+1.0.12 - 06/06/25
+
+    added API method ep_logs_get_with_since()
