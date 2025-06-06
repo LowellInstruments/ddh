@@ -92,8 +92,7 @@ from utils.flag_paths import (
     LI_PATH_GROUPED_S3_FILE_FLAG,
     LI_PATH_PLT_ONLY_INSIDE_WATER,
 )
-from utils.wdog import gui_dog_clear
-
+from utils.wdog import gui_dog_clear, gui_dog_enable
 
 _g_flag_ble_en = dds_get_cfg_flag_ble_en()
 
@@ -109,6 +108,7 @@ class DDH(QMainWindow, d_m.Ui_MainWindow):
         gui_setup_center_window(self)
         lg.are_enabled(True)
         gui_dog_clear()
+        gui_dog_enable()
         gui_ddh_set_brightness(self)
 
         # show and hide stuff

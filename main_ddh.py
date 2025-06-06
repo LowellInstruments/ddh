@@ -22,12 +22,12 @@ from utils.ddh_shared import (
 )
 import setproctitle
 from utils.logs import lg_gui as lg
-from utils.wdog import gui_dog_get
+from utils.wdog import gui_dog_get, gui_dog_is_enabled
 import subprocess as sp
 
 
-GUI_WD_EXPIRE_SECS = 60
-GUI_WD_START_SECS = 180
+GUI_WD_EXPIRE_SECS = 30
+GUI_WD_START_SECS = 30
 
 
 def main_ddh():
@@ -73,18 +73,27 @@ def controller_main_ddh():
 
     while 1:
         time.sleep(5)
-        v = gui_dog_get()
         kill = 0
         kill_by_wd = 0
+
+        # closed by user
         if os.path.exists(f):
             os.unlink(f)
             lg.a(f"=== debug: user closed {s} ===")
             kill = 1
-        if v > GUI_WD_START_SECS and time.perf_counter() > v + GUI_WD_EXPIRE_SECS:
-            # detects hangs of child GUI
-            lg.a(f"=== {s} debug: {time.perf_counter()}, {v} child seems crashed ===")
-            kill = 1
-            kill_by_wd = 1
+
+        # closed by watchdog
+        v = gui_dog_get()
+        if gui_dog_is_enabled():
+            if v > GUI_WD_START_SECS and time.perf_counter() > v + GUI_WD_EXPIRE_SECS:
+                # detects hangs of child GUI
+                lg.a(f"=== {s} warning: {time.perf_counter()}, {v} child seems crashed ===")
+                kill = 1
+                kill_by_wd = 1
+        else:
+            lg.a(f"=== {s} debug: {v} child seems crashed but GUI watchdog is disabled ===")
+
+        # check kill flags
         if kill:
             # in this order or message does not show
             lg.a(f'debug: closing GUI, crontab will relaunch it', show_ts=0)
@@ -94,7 +103,7 @@ def controller_main_ddh():
                 lg.a(f'warning: DDH watchdog had to intervene')
                 notify_error_sw_crash()
 
-            # kills GUI + GUI controller but not DDS, crontab will relaunch them
+            # kills GUI + GUI controller, NOT DDS, crontab will relaunch them
             ddh_kill_by_pid_file()
 
 

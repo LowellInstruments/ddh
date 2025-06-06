@@ -1,18 +1,19 @@
 import datetime
 import glob
 import os
+import time
 import requests
 from PyQt5.QtGui import QMovie
-
 from ddh.preferences import preferences_get_models_index
 from mat.utils import linux_is_rpi
 from utils.ddh_shared import (
     ddh_get_folder_path_res,
 )
 from utils.logs import lg_gui as lg
+from utils.wdog import gui_dog_disable, gui_dog_enable
 
 
-def gui_populate_maps_tab(my_app):
+def _gui_populate_maps_tab(my_app):
     addr_ddn_api = 'ddn.lowellinstruments.com'
     port_ddn_api = 9000
     deg = 'F'
@@ -45,6 +46,7 @@ def gui_populate_maps_tab(my_app):
 
     # get DTM map from DDN
     t = 5
+    _el = time.perf_counter()
     if not os.path.exists(fg_dtm):
         lg.a(f"requesting today's DTM model file {fg_dtm}")
         url = f'http://{addr_ddn_api}:{port_ddn_api}/dtm?t={now}&deg={deg}'
@@ -56,12 +58,14 @@ def gui_populate_maps_tab(my_app):
                 got_dtm = True
                 lg.a('OK: got DTM model file')
         except (Exception,) as err:
-            lg.a(f'error: DTM models request -> {err}')
+            _el = int(time.perf_counter() - _el)
+            lg.a(f'error: DTM models request -> {err}, took {_el} seconds')
     else:
         got_dtm = True
         lg.a(f"re-using today's DTM forecast model file {fg_dtm}")
 
     # get GOM map from DDN
+    _el = time.perf_counter()
     if not os.path.exists(fg_gom):
         lg.a(f"requesting today's GOM model file {fg_gom}")
         t = 5
@@ -74,12 +78,14 @@ def gui_populate_maps_tab(my_app):
                 got_gom = True
                 lg.a('OK: got GOM model file')
         except (Exception,) as err:
-            lg.a(f'error: GOM models request -> {err}')
+            _el = int(time.perf_counter() - _el)
+            lg.a(f'error: GOM models request -> {err}, took {_el} seconds')
     else:
         got_gom = True
         lg.a(f"re-using today's GOM forecast model file {fg_gom}")
 
     # get MAB map from DDN
+    _el = time.perf_counter()
     if not os.path.exists(fg_mab):
         lg.a(f"requesting today's MAB model file {fg_mab}")
         t = 5
@@ -92,7 +98,8 @@ def gui_populate_maps_tab(my_app):
                 got_mab = True
                 lg.a('OK: got MAB model file')
         except (Exception,) as err:
-            lg.a(f'error: MAB models request -> {err}')
+            _el = int(time.perf_counter() - _el)
+            lg.a(f'error: MAB models request -> {err}, took {_el} seconds')
     else:
         got_mab = True
         lg.a(f"re-using today's MAB forecast map file {fg_mab}")
@@ -133,4 +140,10 @@ def gui_populate_maps_tab(my_app):
     a.lbl_map.setMovie(a.gif_map)
     a.gif_map.start()
     a.map_filename = fp
+
+
+def gui_populate_maps_tab(my_app):
+    gui_dog_disable()
+    _gui_populate_maps_tab(my_app)
+    gui_dog_enable()
 

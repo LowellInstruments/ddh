@@ -476,5 +476,6 @@
 4.1.02 06/05/25
 
     improved GUI watchdog on main_ddh.py
+    made watchdog ignore maps getting, which might block a bit
 
     

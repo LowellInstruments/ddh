@@ -1,12 +1,30 @@
+import pathlib
+
 import time
 import os
 
-DOG_GUI = '/dev/shm/dog_gui.txt'
+
+DOG_GUI = '/tmp/dog_gui.txt'
+DOG_GUI_EN = '/tmp/dog_gui_en.txt'
+
 
 
 # ---------------------------
 # a watchdog for the DDH GUI
 # ---------------------------
+
+
+def gui_dog_is_enabled():
+    return os.path.exists(DOG_GUI_EN)
+
+
+def gui_dog_disable():
+    if os.path.exists(DOG_GUI_EN):
+        os.unlink(DOG_GUI_EN)
+
+
+def gui_dog_enable():
+    pathlib.Path(DOG_GUI_EN).touch(exist_ok=True)
 
 
 def gui_dog_clear():
