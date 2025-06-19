@@ -473,6 +473,11 @@
 
     we no longer send both BOOT and ALIVE notifications at the same time when booting
 
+4.1.02 06/19/25
+
+    ble.py made detect new naming scheme DO2
+    ble_scan.py made detect new naming scheme DO2
+
 4.1.02 06/05/25
 
     improved GUI watchdog on main_ddh.py
