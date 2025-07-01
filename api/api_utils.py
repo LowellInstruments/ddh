@@ -27,7 +27,7 @@ from utils.flag_paths import (
     TMP_PATH_GPS_LAST_JSON,
     TMP_PATH_BLE_IFACE,
     LI_PATH_CELL_FW,
-    TMP_PATH_INET_VIA
+    TMP_PATH_INET_VIA, LI_PATH_GROUPED_S3_FILE_FLAG
 )
 
 
@@ -445,6 +445,10 @@ def api_read_aws_sqs_ts():
             'sqs': ('unknown', t)
         }
     return j
+
+
+def api_read_aws_grouped():
+    return os.path.exists(LI_PATH_GROUPED_S3_FILE_FLAG)
 
 
 def extract_filename_from_content_disposition_header(cd):

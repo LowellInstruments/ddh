@@ -48,7 +48,10 @@ from api.api_utils import (
     api_ddh_side_button_2,
     api_dws_start,
     api_dws_stop,
-    api_dws_status, api_get_mac_address_eth0, api_get_mac_address_wlan0
+    api_dws_status,
+    api_get_mac_address_eth0,
+    api_get_mac_address_wlan0,
+    api_read_aws_grouped
 )
 from ddh.db.db_his import DbHis
 from utils.ddh_config import (
@@ -218,6 +221,7 @@ async def api_get_info():
         "gps_iface_used": _th(api_get_gps_iface),
         "disk_capacity": _th(api_get_disk_capacity),
         "aws_sqs_state": _th(api_read_aws_sqs_ts),
+        "aws_grouped": _th(api_read_aws_grouped),
         "boat_prj": _th(dds_get_cfg_box_project),
         "boat_sn": _th(dds_get_cfg_box_sn),
         "boat_name": _th(dds_get_cfg_vessel_name),

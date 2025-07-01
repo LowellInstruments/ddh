@@ -42,3 +42,7 @@
 1.0.12 - 06/06/25
 
     added API method ep_logs_get_with_since()
+
+1.0.13 - 07/01/25
+
+    added aws_grouped() in INFO endpoint, returns 1 if AWS grouped
