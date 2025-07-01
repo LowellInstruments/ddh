@@ -18,7 +18,7 @@ from utils.find_usb_port_auto import find_n_list_all_usb_port_automatically
 from utils.flag_paths import (
     LI_PATH_GROUPED_S3_FILE_FLAG,
     LI_PATH_DDH_GPS_EXTERNAL,
-    TMP_PATH_GPS_DUMMY, TMP_PATH_GRAPH_TEST_MODE_JSON,
+    LI_PATH_GPS_DUMMY, TMP_PATH_GRAPH_TEST_MODE_JSON,
     DDH_USES_SHIELD_JUICE4HALT,
     DDH_USES_SHIELD_SAILOR, LI_PATH_TEST_MODE
 )
@@ -108,7 +108,7 @@ def cb_gps_external():
 
 
 def cb_gps_dummy():
-    p = TMP_PATH_GPS_DUMMY
+    p = LI_PATH_GPS_DUMMY
     unlink(p) if exists(p) else pathlib.Path(p).touch()
 
 
@@ -347,6 +347,12 @@ def ddh_run_check():
             return 0
         return 1
 
+    def _check_gps_dummy():
+        if os.path.exists(LI_PATH_GPS_DUMMY):
+            _w(f'GPS dummy ON')
+            return 1
+        return 0
+
     def _check_files_network():
         path_w = '/etc/wireguard/wg0.conf'
         if is_rpi():
@@ -516,4 +522,8 @@ def ddh_run_check():
     if not ok_shield_j4h and not ok_shield_sailor:
         _e('no power shield detected')
         rv += 1
+
+    # make GPS dummy permanent
+    _check_gps_dummy()
+
     return rv, str_e, str_w, str_i

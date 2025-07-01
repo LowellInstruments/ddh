@@ -13,8 +13,6 @@ def _is_rpi():
 # files stored in /tmp folder
 # ----------------------------
 
-# when present, DDH simulates latitude and longitude values from config.toml
-TMP_PATH_GPS_DUMMY = "/tmp/gps_dummy_mode.json"
 # when present, DDH simulates speed
 TMP_PATH_DDH_BOAT_SPEED_JSON = "/tmp/ddh_boat_speed.json"
 # when present, the BLE code on the DDH is disabled
@@ -56,6 +54,8 @@ DDH_USES_SHIELD_SAILOR = f'{d}/.ddt_sailor_shield.flag'
 LI_FILE_ICCID = f'{d}/.iccid'
 LI_PATH_TEST_MODE = f'{d}/.ddh_test_mode.flag'
 LI_PATH_PLT_ONLY_INSIDE_WATER = f'{d}/.ddh_plt_only_inside_water'
+# when present, DDH simulates latitude and longitude values from config.toml
+LI_PATH_GPS_DUMMY = f'{d}/.gps_dummy_mode.json'
 
 
 # ------------------------------

@@ -483,4 +483,6 @@
     improved GUI watchdog on main_ddh.py
     made watchdog ignore maps getting, which might block a bit
 
-    
+4.1.03 07/01/25
+
+    make GPS dummy permanent    
