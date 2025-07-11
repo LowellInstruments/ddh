@@ -450,32 +450,37 @@
         - when = 2, button debounce time will be .01
         - in any other case, or if key not present, will be the default .001
 
-4.0.97 05/20/2025
+4.0.97  05/20/2025
 
     using new MAT library function ble_mat_disconnect_all_devices_ll()
 
-4.0.98 05/21/25
+4.0.98  05/21/25
 
     improved BLE system health check
     using newer bleak library 0.22.3 instead of 0.21.1 to solve this bug
         https://github.com/hbldh/bleak/issues/1489
 
-4.0.99 05/23/25
+4.0.99  05/23/25
 
     introduced new watchdog for DDS, disabled by default
     introduced "timeout 60" in front of AWS single copy files in aws.py, function _aws_s3_cp_process()
 
-4.1.00 05/27/25
+4.1.00  05/27/25
 
     fixed typo in script_test_box_buttons.py which made last button (lowest) not to work
 
-4.1.01 06/02/25
+4.1.01  06/02/25
 
     we no longer send both BOOT and ALIVE notifications at the same time when booting
 
-4.1.02 06/05/25
+4.1.02  06/05/25
 
     improved GUI watchdog on main_ddh.py
     made watchdog ignore maps getting, which might block a bit
+
+4.1.03  07/11/25
+    
+    made periodic AWS sync again every day to solve track files sync issue
+    changed again CHANGELOG.md date format to use a tab and not spaces
 
     

@@ -52,6 +52,7 @@ dev = not linux_is_rpi()
 past_n_files = 0
 g_aws_sync_at_boot = 1
 g_aws_sync_for_last_year = 1
+g_skip_first_aws_periodic_sync = 1
 
 
 def _get_path_of_aws_binary():
@@ -453,6 +454,24 @@ def _aws_sync_or_cp():
         aws_sync()
         aws_cp_init()
         annotate_time_this_occurred(k, period_aws_cp_secs)
+        return
+
+    # we also do sync once a day to fix track files issue
+    if is_it_time_to('periodic_aws_sync', 86400):
+        global g_skip_first_aws_periodic_sync
+        if g_skip_first_aws_periodic_sync == 0:
+            lg.a("doing S3 sync periodically")
+
+            # we will try enough
+            if os.path.exists(flag_dl):
+                os.unlink(flag_dl)
+
+            # sync and rebuild database assuming went ok
+            aws_sync()
+            aws_cp_init()
+            annotate_time_this_occurred(k, period_aws_cp_secs)
+
+        g_skip_first_aws_periodic_sync = 0
         return
 
     # upload upon newly downloaded BLE files
