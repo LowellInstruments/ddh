@@ -471,6 +471,9 @@ def _aws_sync_or_cp():
             aws_cp_init()
             annotate_time_this_occurred(k, period_aws_cp_secs)
 
+        else:
+            lg.a("skipping first S3 periodic sync")
+
         g_skip_first_aws_periodic_sync = 0
         return
 
