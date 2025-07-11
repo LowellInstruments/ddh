@@ -475,12 +475,17 @@
 
 4.1.02  06/05/25
 
+    ble.py made detect new naming scheme DO2
+    ble_scan.py made detect new naming scheme DO2
+
+4.1.02 06/05/25
+
     improved GUI watchdog on main_ddh.py
     made watchdog ignore maps getting, which might block a bit
+    make GPS dummy permanent    
+
 
 4.1.03  07/11/25
     
     made periodic AWS sync again every day to solve track files sync issue
     changed again CHANGELOG.md date format to use a tab and not spaces
-
-    

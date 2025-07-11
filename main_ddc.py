@@ -19,7 +19,7 @@ from utils.ddh_config import _get_config_file_path, cfg_load_from_file
 from utils.ddh_shared import get_ddh_folder_path_settings
 from utils.find_usb_port_auto import find_n_list_all_usb_port_automatically
 from utils.flag_paths import (
-    TMP_PATH_GPS_DUMMY,
+    LI_PATH_GPS_DUMMY,
     LI_PATH_DDH_GPS_EXTERNAL,
     TMP_PATH_GRAPH_TEST_MODE_JSON, LI_PATH_TEST_MODE,
 )
@@ -443,7 +443,7 @@ def main_ddc():
         _, g_e, g_w, g_i = ddh_run_check()
 
         # get flags
-        fgd = 1 if exists(TMP_PATH_GPS_DUMMY) else 0
+        fgd = 1 if exists(LI_PATH_GPS_DUMMY) else 0
         fge = 1 if exists(LI_PATH_DDH_GPS_EXTERNAL) else 0
         fcd = get_crontab('ddh')
         fgt = 1 if exists(TMP_PATH_GRAPH_TEST_MODE_JSON) else 0

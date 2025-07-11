@@ -230,7 +230,7 @@ def _ble_analyze_and_graph_logger_result(rv,
 
 
 def _ble_logger_is_do1_or_do2(info: str):
-    return "DO-" in info
+    return "DO-" in info or info.startswith('DO2')
 
 
 def _ble_logger_is_tdo(info: str):

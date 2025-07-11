@@ -13,7 +13,7 @@ from mat.utils import linux_is_rpi, linux_is_rpi3, linux_is_rpi4
 import toml
 
 from utils.flag_paths import TMP_PATH_GUI_CLOSED_FLAG, TMP_PATH_DISABLE_BLE, TMP_PATH_AWS_HAS_WORK_VIA_GUI, \
-    TMP_PATH_DDH_GOT_UPDATE, TMP_PATH_DDH_APP_OVERRIDE, TMP_PATH_GPS_DUMMY, \
+    TMP_PATH_DDH_GOT_UPDATE, TMP_PATH_DDH_APP_OVERRIDE, LI_PATH_GPS_DUMMY, \
     TMP_PATH_CNV_REQUESTED_VIA_GUI, LI_PATH_DDH_VERSION, LI_PATH_PLT_ONLY_INSIDE_WATER, TMP_PATH_BLE_SOMETHING_DL
 
 TESTMODE_FILENAME_PREFIX = 'testfile_'
@@ -386,7 +386,7 @@ def check_gps_dummy_mode():
     # comment when testing laptop + puck
     if not linux_is_rpi():
         return True
-    return os.path.exists(TMP_PATH_GPS_DUMMY)
+    return os.path.exists(LI_PATH_GPS_DUMMY)
 
 
 def get_ddh_platform():

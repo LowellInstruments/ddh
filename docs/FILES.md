@@ -37,6 +37,9 @@ Sends files to AWS with the ``testfile`` filename prefix for easy identification
 
 Set by using ``DDC`` tool.
 
+### .gps_dummy_mode.json
+
+This flag indicates the DDH it should use the simulated latitude and longitude values specified in ``config.toml``.
 
 
 
@@ -149,10 +152,6 @@ They get eliminated upon reboot. They are useful to indicate temporary expiring 
 ### .ddh_needs_reboot_post_install.flag
 
 DDH GUI application will not boot while this field is present.
-
-### gps_dummy_mode.json
-
-This flag indicates the DDH it should use the simulated latitude and longitude values specified in ``config.toml``.
 
 ### ddh_boat_speed.json
 

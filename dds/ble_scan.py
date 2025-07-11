@@ -58,9 +58,9 @@ def _ble_is_supported_logger(s):
 
     # new naming schema to work with BLE mobile app
     new_named_logger_types = [
-        "DO1_",
-        "DO2_",
-        "TDO_",
+        "DO1",
+        "DO2",
+        "TDO",
     ]
 
     for t in logger_types:
