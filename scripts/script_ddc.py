@@ -278,7 +278,7 @@ def ddh_run_check():
         repo = 'https://raw.githubusercontent.com/LowellInstruments/ddh/toml'
         s = '.ddh_version'
         c = f'timeout 2 wget {repo}/{s}'
-        c += f' -O /tmp/{s}'
+        c += f' -q -O /tmp/{s}'
         rv = sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
         if rv.returncode:
             _e('cannot obtain github remote DDH version')

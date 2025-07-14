@@ -246,7 +246,7 @@ def notify_ddh_needs_sw_update(g):
         # get github version
         s = '.ddh_version'
         c = f'timeout 2 wget https://raw.githubusercontent.com/LowellInstruments/ddh/master/{s}'
-        c += f' -O /tmp/{s}'
+        c += f' -q -O /tmp/{s}'
         rv = sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
         if rv.returncode:
             lg.a('error: cannot obtain remote DDH version')
