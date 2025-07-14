@@ -484,8 +484,12 @@
     made watchdog ignore maps getting, which might block a bit
     make GPS dummy permanent    
 
-
 4.1.03  07/11/25
     
     made periodic AWS sync again every day to solve track files sync issue
     changed again CHANGELOG.md date format to use a tab and not spaces
+
+4.1.04  07/14/25
+
+    made wget -q so .ddh_version does not generate wget-log files in DDH folder
+    added function _aws_cp_track_file() but disabled it

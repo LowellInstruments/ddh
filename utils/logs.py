@@ -14,6 +14,7 @@ from mat.utils import PrintColors as PC
 g_last_tk_ts_unit = None
 g_last_file_out = ''
 g_last_t = ''
+g_current_track_file = None
 
 
 class DDSLogs:
@@ -164,6 +165,10 @@ def dds_log_tracking_add(lat, lon, tg):
         file_out = os.path.dirname(file_out) + '/' + \
                    TESTMODE_FILENAME_PREFIX + os.path.basename(file_out)
 
+    # used by AWS cp
+    global g_current_track_file
+    g_current_track_file = file_out
+
     # -----------------------------
     # write the tracking line alone
     # -----------------------------
@@ -186,3 +191,7 @@ def dds_log_tracking_add(lat, lon, tg):
         _bn = os.path.basename(f_lef)
         lg_log.a(f"deleting LEF file {_bn}")
         os.unlink(f_lef)
+
+
+def get_path_current_track_file():
+    return g_current_track_file

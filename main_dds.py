@@ -12,7 +12,7 @@ from dds.ble import (
     ble_interact_all_loggers,
     ble_show_antenna_type,
     ble_check_antenna_up_n_running,
-    ble_op_conditions_met,
+    ble_ddh_operational_conditions_met,
     ble_show_monitored_macs, ble_reset_antenna
 )
 from dds.ble_scan import ble_scan
@@ -255,7 +255,7 @@ def main_dds():
             continue
 
         # check operation conditions are met
-        if not ble_op_conditions_met(g):
+        if not ble_ddh_operational_conditions_met(g):
             continue
 
         # moving this here allows for way lighter GPQ files

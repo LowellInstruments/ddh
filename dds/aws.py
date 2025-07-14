@@ -42,7 +42,7 @@ from utils.ddh_shared import (
     ddh_get_db_status_file, TESTMODE_FILENAME_PREFIX, dds_get_flag_file_some_ble_dl,
 )
 from utils.flag_paths import LI_PATH_LAST_YEAR_AWS_TEMPLATE
-from utils.logs import lg_aws as lg
+from utils.logs import lg_aws as lg, get_path_current_track_file
 
 PERIOD_AWS_S3_SECS = 3600 * 6
 PERIOD_ALARM_AWS_S3 = 86400 * 7
@@ -346,6 +346,71 @@ def _aws_s3_cp_process(ls):
     sys.exit(0)
 
 
+def _aws_cp_track_file():
+    path = get_path_current_track_file()
+
+    # banner
+    lg.a(f'debug: attempting S3 upload-cp track file {os.path.basename(path)}')
+
+    # sys.exit() instead of return prevents zombie processes
+    setproctitle.setproctitle(AWS_S3_CP_PROC_NAME)
+    _k = dds_get_cfg_aws_credential("cred_aws_key_id")
+    _s = dds_get_cfg_aws_credential("cred_aws_secret")
+    _n = dds_get_cfg_aws_credential("cred_aws_bucket")
+    if _k is None or _s is None or _n is None:
+        lg.a("warning: missing credentials to AWS cp track file")
+        _u(STATE_DDS_NOTIFY_CLOUD_LOGIN)
+        sys.exit(1)
+
+    if not _n.startswith("bkt-"):
+        lg.a('warning: bucket name does not start with bkt-')
+
+    # prepare to run it
+    # _n: bkt-kaz
+    # f: '/home/.../d0-2e-ab-d9-30-66/2222222_TST_20240904_143008.gps
+    # _u(STATE_DDS_NOTIFY_CLOUD_BUSY)
+    _bin = _get_path_of_aws_binary()
+    dr = "--dryrun" if dev else ""
+    um = path.split('/')[-2]
+    f_bn = os.path.basename(path)
+    y = datetime.datetime.utcnow().year
+    if this_box_has_grouped_s3_uplink():
+        lg.a(f'S3 upload-cp track file GROUPed for folder {um}, year {y}')
+        # v: "name's" --> NAMES
+        v = dds_get_cfg_vessel_name().replace("'", "").replace(" ", "_").upper()
+        # um: we prepend grouped structure year and boat
+        um = f"{str(y)}/{v}/{um}"
+    else:
+        lg.a(f'S3 upload-cp track file NON-GROUPed for folder {um}, year {y}')
+
+    # build the AWS command
+    c = (
+        f"AWS_ACCESS_KEY_ID={_k} AWS_SECRET_ACCESS_KEY={_s} "
+        f"timeout 5 {_bin} s3 cp {path} s3://{_n}/{um}/{f_bn} {dr} "
+    )
+
+    # run AWS cp command
+    rv = sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+    if rv.stdout:
+        lg.a(rv.stdout)
+    if rv.returncode:
+        # error copying
+        # _u(STATE_DDS_NOTIFY_CLOUD_ERR)
+        lg.a(f"error: {rv.stderr}")
+        sys.exit(2)
+
+    # add to database as file copied
+    # aws_cp_add_to_db_file(path, os.path.getsize(path))
+
+    # this file went OK
+    # _u(STATE_DDS_NOTIFY_CLOUD_OK)
+    lg.a(f"success: S3 upload-cp track file {os.path.basename(path)}")
+
+    # this AWS cp is a separate process, we can exit here
+    # _u(STATE_DDS_NOTIFY_CLOUD_OK)
+    sys.exit(0)
+
+
 def aws_cp():
 
     # get difference
@@ -456,26 +521,26 @@ def _aws_sync_or_cp():
         annotate_time_this_occurred(k, period_aws_cp_secs)
         return
 
-    # we also do sync once a day to fix track files issue
-    if is_it_time_to('periodic_aws_sync', 86400):
-        global g_skip_first_aws_periodic_sync
-        if g_skip_first_aws_periodic_sync == 0:
-            lg.a("doing S3 sync periodically")
-
-            # we will try enough
-            if os.path.exists(flag_dl):
-                os.unlink(flag_dl)
-
-            # sync and rebuild database assuming went ok
-            aws_sync()
-            aws_cp_init()
-            annotate_time_this_occurred(k, period_aws_cp_secs)
-
-        else:
-            lg.a("skipping first S3 periodic sync")
-
-        g_skip_first_aws_periodic_sync = 0
-        return
+    # # also do sync once a day to fix track files uploads issue
+    # if is_it_time_to('periodic_aws_sync', 86400):
+    #     global g_skip_first_aws_periodic_sync
+    #     if g_skip_first_aws_periodic_sync == 0:
+    #         lg.a("doing S3 sync periodically")
+    #
+    #         # we will try enough
+    #         if os.path.exists(flag_dl):
+    #             os.unlink(flag_dl)
+    #
+    #         # sync and rebuild database assuming went ok
+    #         aws_sync()
+    #         aws_cp_init()
+    #         annotate_time_this_occurred(k, period_aws_cp_secs)
+    #
+    #     else:
+    #         lg.a("skipping first S3 periodic sync")
+    #
+    #     g_skip_first_aws_periodic_sync = 0
+    #     return
 
     # upload upon newly downloaded BLE files
     if os.path.exists(flag_dl):
@@ -483,6 +548,8 @@ def _aws_sync_or_cp():
         os.unlink(flag_dl)
         aws_cp()
         annotate_time_this_occurred(k, period_aws_cp_secs)
+        # fix track files uploads issue
+        # _aws_cp_track_file()
         return
 
     # check enough time passed since last AWS copy

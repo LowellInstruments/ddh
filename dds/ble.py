@@ -464,7 +464,7 @@ def ble_show_monitored_macs():
         lg.a(f"    - {i}")
 
 
-def ble_op_conditions_met(g) -> bool:
+def ble_ddh_operational_conditions_met(g) -> bool:
 
     lat, lon, tg, knots = g
 
