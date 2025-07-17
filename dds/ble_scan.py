@@ -180,6 +180,23 @@ async def ble_scan(macs_mon, g, _h: int, _h_desc, t=6.0):
 
     def _scan_cb(d: BLEDevice, _):
         mac = d.address.lower()
+
+        # smart lock-out feature
+        if mac in macs_mon:
+            if exp_get_use_smart_lockout() == 1:
+                ev_slo = f'dl_{mac}'
+                tell_ev_slo_deck = 'tell_deck_' + ev_slo
+                if not query_is_it_time_to(ev_slo):
+                    # refresh
+                    annotate_time_this_occurred(
+                        ev_slo,
+                        BLE_SMART_LOCKOUT_PURGE_S,
+                        pre_rm=1
+                    )
+                    if is_it_time_to(tell_ev_slo_deck, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
+                        lg.a(f'debug: smart lock-out ignores logger {mac}, it seems left on-deck')
+                    return
+
         # dt: device type 'TDO'
         dt = d.name
         _all[mac] = dt
@@ -231,27 +248,6 @@ async def ble_scan(macs_mon, g, _h: int, _h_desc, t=6.0):
             s = "warning: detected crowded BLE environment"
             if is_it_time_to(s, t=3600 * 6):
                 lg.a(s)
-
-        # prune depending on smart lock-out
-        if exp_get_use_smart_lockout() == 1:
-            ls_macs_discard_slo = []
-            for mac, dt in _our.items():
-                ev_slo = f'dl_{mac}'
-                tell_ev_slo_deck = 'tell_deck_' + ev_slo
-                if not query_is_it_time_to(ev_slo):
-                    # refresh
-                    annotate_time_this_occurred(
-                        ev_slo,
-                        BLE_SMART_LOCKOUT_PURGE_S,
-                        pre_rm=1
-                    )
-                    ls_macs_discard_slo.append(mac)
-                    if is_it_time_to(tell_ev_slo_deck, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
-                        lg.a(f'debug: smart lock-out ignores logger {mac}, it seems left on-deck')
-
-            # remove non-wanted ones
-            for mac in ls_macs_discard_slo:
-                del _our[mac]
 
         return _our
 
