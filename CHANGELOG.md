@@ -493,3 +493,7 @@
 
     made wget -q so .ddh_version does not generate wget-log files in DDH folder
     added function _aws_cp_track_file() but disabled it
+
+4.1.05  07.17.25
+
+    made log files only one per day, NOT one per DDH run anymore

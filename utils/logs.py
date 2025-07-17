@@ -15,6 +15,9 @@ g_last_tk_ts_unit = None
 g_last_file_out = ''
 g_last_t = ''
 g_current_track_file = None
+g_first_ever = True
+
+g_vn = dds_get_cfg_vessel_name()
 
 
 class DDSLogs:
@@ -28,7 +31,7 @@ class DDSLogs:
         assert entity in ("dds", "gui")
         d = str(get_ddh_folder_path_logs())
         Path(d).mkdir(parents=True, exist_ok=True)
-        now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        now = datetime.datetime.now().strftime(f"%Y%m%d_{g_vn}")
         return f"{d}/{entity}_{now}.log"
 
     def _retrieve_log_file_name(self):
@@ -70,6 +73,11 @@ class DDSLogs:
 
         # pre-pend date, better logs
         with open(self.f_name, "a") as f:
+            global g_first_ever
+            if g_first_ever:
+                g_first_ever = False
+                f.write('\n\n\n\n\n============== DDH log session started ===============')
+
             if g_last_t != now:
                 if show_ts:
                     ts = f"\n\n[ CLK ] {now} / {utcnow}"
@@ -177,9 +185,9 @@ def dds_log_tracking_add(lat, lon, tg):
     with open(file_out, 'a') as f:
         f.write(f"{str_iso_tg_tz_utc},{lat},{lon}\n")
 
-    # ------------------------------
-    # add info from LEF files, if so
-    # ------------------------------
+    # -------------------------------------------------
+    # add info from LEF files to the TRACK file, if so
+    # -------------------------------------------------
     ff_lef = glob.glob(f"{get_ddh_folder_path_lef()}/*.lef")
     for f_lef in ff_lef:
         with open(f_lef, 'r') as fl:
