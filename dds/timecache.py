@@ -59,6 +59,10 @@ def is_it_time_to(k, t, annotate=True):
     return False
 
 
+def query_is_it_time_to(k):
+    return not _g_timecache.has(k)
+
+
 # test
 if __name__ == '__main__':
     annotate_time_this_occurred('k', 10)

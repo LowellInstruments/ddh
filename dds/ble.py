@@ -37,7 +37,7 @@ from dds.notifications_v2 import (
 )
 from dds.state import ddh_state
 from dds.timecache import is_it_time_to, annotate_time_this_occurred, delete_all_annotations_by_mask, \
-    show_all_annotations_by_mask, delete_annotation
+    show_all_annotations_by_mask, delete_annotation, query_is_it_time_to
 from mat.ble.ble_mat_utils import (
     ble_mat_systemctl_restart_bluetooth,
     ble_mat_get_antenna_type_v2
@@ -99,7 +99,7 @@ BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S = 600
 _g_logger_errors = {}
 
 
-def _ble_show_logger_spotted(mac, _b, _o):
+def _ble_show_logger_spotted_or_colored(mac, _b, _o):
     if is_it_time_to(f'tell_saw_mac_{mac}', 1800):
         sn = dds_get_cfg_logger_sn_from_mac(mac)
         lg.a(f"logger {sn} / mac {mac} nearby")
@@ -410,34 +410,24 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
         _b = is_mac_in_black(mac)
         _o = is_mac_in_orange(mac)
 
-        # from time to time it tells you the logger is under colored lists
-        _ble_show_logger_spotted(mac, _b, _o)
-
-        # unconditionally refresh smart lock-out when logger in black list
-        if _b:
-            annotate_time_this_occurred(
-                ev,
-                BLE_SMART_LOCKOUT_PURGE_S,
-                pre_rm=1
-            )
-
-        # we don't want extra delays when doing orange macs
-        if _o:
-            delete_annotation(ev)
-
-        if _b or _o:
-            continue
+        # ---------------------------
+        # new feature smart lock-out
+        # ---------------------------
 
         # for debug
         # if exp_get_use_smart_lockout() == 1:
         #     show_all_annotations_by_mask('dl_')
 
+        # we don't want extra delays when doing orange macs
+        if _o:
+            delete_annotation(ev)
+
         # condition smart lock-out
         if exp_get_use_smart_lockout() == 1:
-            if is_it_time_to(ev, BLE_SMART_LOCKOUT_PURGE_S, annotate=False):
-                # allow BUT NO annotate, only do upon download success
+            if query_is_it_time_to(ev):
                 lg.a(f'debug: smart lock-out allows logger {sn}')
             else:
+                # refresh
                 annotate_time_this_occurred(
                     ev,
                     BLE_SMART_LOCKOUT_PURGE_S,
@@ -446,6 +436,14 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
                 if is_it_time_to(tell_ev_deck, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
                     lg.a(f'debug: smart lock-out ignores logger {sn}, it seems left on-deck')
                 continue
+
+
+        # from time to time it tells you the logger is under colored lists
+        _ble_show_logger_spotted_or_colored(mac, _b, _o)
+
+        # typical colored mac list behavior
+        if _b or _o:
+            continue
 
         # show the position of the logger we will download
         gps_utils_log_position_logger(g)
