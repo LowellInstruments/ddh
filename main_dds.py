@@ -241,11 +241,13 @@ def main_dds():
             if linux_is_rpi():
                 lg.a("warning: starting hci0 reset")
                 ble_reset_antenna(0)
+                time.sleep(1)
                 lg.a("warning: starting hci1 reset")
                 ble_reset_antenna(1)
-                lg.a("warning: resetting bluetooth service")
-                ble_mat_systemctl_restart_bluetooth()
-                time.sleep(3)
+                time.sleep(1)
+                #lg.a("warning: resetting bluetooth service")
+                #ble_mat_systemctl_restart_bluetooth()
+                #time.sleep(3)
                 h, h_d = ble_mat_get_antenna_type_v2()
                 ble_show_antenna_type(h, h_d)
 

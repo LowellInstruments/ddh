@@ -543,4 +543,3 @@ def ble_check_antenna_up_n_running(g, h: int):
 def ble_reset_antenna(h: int):
     c = f"sudo hciconfig hci{h} reset"
     sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
-    time.sleep(1)
