@@ -4,11 +4,12 @@ from math import ceil
 from bleak.assigned_numbers import AdvertisementDataType
 from bleak.backends.bluezdbus.advertisement_monitor import OrPattern
 
+from dds.ble import BLE_SMART_LOCKOUT_PURGE_S, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S
 from dds.macs import macs_black, macs_orange
 from dds.state import ddh_state
-from dds.timecache import is_it_time_to
+from dds.timecache import is_it_time_to, query_is_it_time_to, annotate_time_this_occurred
 from mat.ble.ble_mat_utils import ble_mat_get_bluez_version
-from utils.ddh_config import dds_get_cfg_monitored_macs, exp_get_use_ble_passive_scanning
+from utils.ddh_config import dds_get_cfg_monitored_macs, exp_get_use_ble_passive_scanning, exp_get_use_smart_lockout
 from utils.ddh_shared import (
     send_ddh_udp_gui as _u,
     STATE_DDS_BLE_SCAN_FIRST_EVER,
@@ -88,6 +89,23 @@ async def ble_scan(macs_mon, g, _h: int, _h_desc, t=6.0):
         _all[mac] = dt
         if not _ble_is_supported_logger(dt):
             return
+
+        # build variables
+        ev_slo = f'dl_{mac}'
+        tell_ev_slo_deck = 'tell_deck_' + ev_slo
+        if mac in macs_mon:
+            if exp_get_use_smart_lockout() == 1:
+                if not query_is_it_time_to(ev_slo):
+                    # refresh
+                    annotate_time_this_occurred(
+                        ev_slo,
+                        BLE_SMART_LOCKOUT_PURGE_S,
+                        pre_rm=1
+                    )
+                    if is_it_time_to(tell_ev_slo_deck, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
+                        lg.a(f'debug: smart lock-out ignores logger {mac}, it seems left on-deck')
+                    return
+
         # allows bleak scan to end faster
         if mac in macs_mon and mac not in macs_bad:
             _our[mac] = dt

@@ -403,20 +403,11 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
 
         # build variables
         ev = f'dl_{mac}'
-        tell_ev_deck = 'tell_deck_' + ev
         sn = dds_get_cfg_logger_sn_from_mac(mac)
 
         # check mac-colored lists
         _b = is_mac_in_black(mac)
         _o = is_mac_in_orange(mac)
-
-        # ---------------------------
-        # new feature smart lock-out
-        # ---------------------------
-
-        # for debug
-        # if exp_get_use_smart_lockout() == 1:
-        #     show_all_annotations_by_mask('dl_')
 
         # we don't want extra delays when doing orange macs
         if _o:
@@ -425,18 +416,7 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
         # condition smart lock-out
         if exp_get_use_smart_lockout() == 1:
             if query_is_it_time_to(ev):
-                lg.a(f'debug: smart lock-out allows logger {sn}')
-            else:
-                # refresh
-                annotate_time_this_occurred(
-                    ev,
-                    BLE_SMART_LOCKOUT_PURGE_S,
-                    pre_rm=1
-                )
-                if is_it_time_to(tell_ev_deck, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
-                    lg.a(f'debug: smart lock-out ignores logger {sn}, it seems left on-deck')
-                continue
-
+                lg.a(f'debug: smart lock-out allows logger {sn}, mac {mac}')
 
         # from time to time it tells you the logger is under colored lists
         _ble_show_logger_spotted_or_colored(mac, _b, _o)
