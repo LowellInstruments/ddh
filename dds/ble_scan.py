@@ -102,8 +102,7 @@ async def ble_scan(macs_mon, g, _h: int, _h_desc, t=6.0):
                         BLE_SMART_LOCKOUT_PURGE_S,
                         pre_rm=1
                     )
-                    if is_it_time_to(tell_ev_slo_deck, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
-                        lg.a(f'debug: smart lock-out ignores logger {mac}, it seems left on-deck')
+                    lg.a(f'debug: smart lock-out ignores logger {mac}, it seems left on-deck')
                     return
 
         # allows bleak scan to end faster
