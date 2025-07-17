@@ -93,7 +93,7 @@ from utils.logs import lg_dds as lg
 
 
 # time the logger is NOT detected by BLE scan
-BLE_SMART_LOCKOUT_PURGE_S = 120
+BLE_SMART_LOCKOUT_PURGE_S = 300
 # how often we tell this logger is not downloaded because SLO
 BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S = 600
 _g_logger_errors = {}

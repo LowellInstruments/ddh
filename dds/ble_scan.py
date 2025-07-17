@@ -74,6 +74,102 @@ def _ble_is_supported_logger(s):
 
 
 
+# async def ble_scan(macs_mon, g, _h: int, _h_desc, t=6.0):
+#
+#     # classify devs
+#     _all = {}
+#     _our = {}
+#     macs_bad = set(macs_black()).union(set(macs_orange()))
+#     macs_bad = [get_mac_from_folder_path(i) for i in macs_bad]
+#
+#     def _scan_cb(d: BLEDevice, _):
+#         mac = d.address.lower()
+#         # dt: device type 'TDO'
+#         dt = d.name
+#         _all[mac] = dt
+#         if not _ble_is_supported_logger(dt):
+#             return
+#
+#         # build variables
+#         ev_slo = f'dl_{mac}'
+#         tell_ev_slo_deck = 'tell_deck_' + ev_slo
+#         if mac in macs_mon:
+#             if exp_get_use_smart_lockout() == 1:
+#                 if not query_is_it_time_to(ev_slo):
+#                     # refresh
+#                     annotate_time_this_occurred(
+#                         ev_slo,
+#                         BLE_SMART_LOCKOUT_PURGE_S,
+#                         pre_rm=1
+#                     )
+#                     lg.a(f'debug: smart lock-out ignores logger {mac}, it seems left on-deck')
+#                     return
+#
+#         # allows bleak scan to end faster
+#         if mac in macs_mon and mac not in macs_bad:
+#             _our[mac] = dt
+#             global _g_ble_scan_early_leave
+#             _g_ble_scan_early_leave = mac
+#
+#     # real code function starts here
+#     global _g_first_ble_scan_ever
+#     if _g_first_ble_scan_ever:
+#         _u(STATE_DDS_BLE_SCAN_FIRST_EVER)
+#         _g_first_ble_scan_ever = False
+#     _u(STATE_DDS_BLE_SCAN)
+#
+#     # convert hci format integer to string
+#     ad = f"hci{_h}"
+#
+#     try:
+#         # -------------------------------
+#         # active or passive BLE scanning
+#         # -------------------------------
+#         if _g_ble_scan_mode == 'passive':
+#             args = BlueZScannerArgs(
+#                 or_patterns=[OrPattern(0, AdvertisementDataType.COMPLETE_LOCAL_NAME, b"ZT-MOANA"),
+#                              OrPattern(0, AdvertisementDataType.COMPLETE_LOCAL_NAME, b"TDO"),
+#                              OrPattern(0, AdvertisementDataType.COMPLETE_LOCAL_NAME, b"DO-1"),
+#                              OrPattern(0, AdvertisementDataType.COMPLETE_LOCAL_NAME, b"DO-2"),
+#                              ]
+#             )
+#             scanner = BleakScanner(_scan_cb, None,
+#                                    adapter=ad,
+#                                    scanning_mode=_g_ble_scan_mode,
+#                                    bluez=args)
+#         else:
+#             scanner = BleakScanner(_scan_cb, None,
+#                                    adapter=ad,
+#                                    scanning_mode=_g_ble_scan_mode)
+#
+#         # perform bleak scanning procedure
+#         global _g_ble_scan_early_leave
+#         _g_ble_scan_early_leave = None
+#         await scanner.start()
+#         for i in range(ceil(t) * 10):
+#             # * 10 to be able to sleep 100 ms
+#             await asyncio.sleep(.1)
+#             if _g_ble_scan_early_leave:
+#                 # lg.a(f"OK: fast scan for {_g_ble_scan_early_leave}")
+#                 break
+#         await scanner.stop()
+#
+#         # _our_devs: {'60:77:71:22:ca:6d': 'DO-2', ...}
+#         if len(_all) > 15:
+#             s = "warning: detected crowded BLE environment"
+#             if is_it_time_to(s, t=3600 * 6):
+#                 lg.a(s)
+#         return _our
+#
+#     except (asyncio.TimeoutError, BleakError, OSError) as ex:
+#         lg.a(f"ble_scan() hardware error on {ad} -> {ex}")
+#         lg.a('warning: setting state_set_ble_reset_req = 1 in function ble_scan')
+#         ddh_state.state_set_ble_reset_req()
+#         return {}
+
+
+
+
 async def ble_scan(macs_mon, g, _h: int, _h_desc, t=6.0):
 
     # classify devs
@@ -90,26 +186,9 @@ async def ble_scan(macs_mon, g, _h: int, _h_desc, t=6.0):
         if not _ble_is_supported_logger(dt):
             return
 
-        # build variables
-        ev_slo = f'dl_{mac}'
-        tell_ev_slo_deck = 'tell_deck_' + ev_slo
-        if mac in macs_mon:
-            if exp_get_use_smart_lockout() == 1:
-                if not query_is_it_time_to(ev_slo):
-                    # refresh
-                    annotate_time_this_occurred(
-                        ev_slo,
-                        BLE_SMART_LOCKOUT_PURGE_S,
-                        pre_rm=1
-                    )
-                    lg.a(f'debug: smart lock-out ignores logger {mac}, it seems left on-deck')
-                    return
-
         # allows bleak scan to end faster
         if mac in macs_mon and mac not in macs_bad:
             _our[mac] = dt
-            global _g_ble_scan_early_leave
-            _g_ble_scan_early_leave = mac
 
     # real code function starts here
     global _g_first_ble_scan_ever
@@ -143,15 +222,8 @@ async def ble_scan(macs_mon, g, _h: int, _h_desc, t=6.0):
                                    scanning_mode=_g_ble_scan_mode)
 
         # perform bleak scanning procedure
-        global _g_ble_scan_early_leave
-        _g_ble_scan_early_leave = None
         await scanner.start()
-        for i in range(ceil(t) * 10):
-            # * 10 to be able to sleep 100 ms
-            await asyncio.sleep(.1)
-            if _g_ble_scan_early_leave:
-                # lg.a(f"OK: fast scan for {_g_ble_scan_early_leave}")
-                break
+        await asyncio.sleep(t)
         await scanner.stop()
 
         # _our_devs: {'60:77:71:22:ca:6d': 'DO-2', ...}
@@ -159,6 +231,28 @@ async def ble_scan(macs_mon, g, _h: int, _h_desc, t=6.0):
             s = "warning: detected crowded BLE environment"
             if is_it_time_to(s, t=3600 * 6):
                 lg.a(s)
+
+        # prune depending on smart lock-out
+        if exp_get_use_smart_lockout() == 1:
+            ls_macs_discard_slo = []
+            for mac, dt in _our.items():
+                ev_slo = f'dl_{mac}'
+                tell_ev_slo_deck = 'tell_deck_' + ev_slo
+                if not query_is_it_time_to(ev_slo):
+                    # refresh
+                    annotate_time_this_occurred(
+                        ev_slo,
+                        BLE_SMART_LOCKOUT_PURGE_S,
+                        pre_rm=1
+                    )
+                    ls_macs_discard_slo.append(mac)
+                    if is_it_time_to(tell_ev_slo_deck, BLE_PERIOD_TELL_LOGGER_UNDER_SLO_S):
+                        lg.a(f'debug: smart lock-out ignores logger {mac}, it seems left on-deck')
+
+            # remove non-wanted ones
+            for mac in ls_macs_discard_slo:
+                del _our[mac]
+
         return _our
 
     except (asyncio.TimeoutError, BleakError, OSError) as ex:
@@ -166,3 +260,4 @@ async def ble_scan(macs_mon, g, _h: int, _h_desc, t=6.0):
         lg.a('warning: setting state_set_ble_reset_req = 1 in function ble_scan')
         ddh_state.state_set_ble_reset_req()
         return {}
+
