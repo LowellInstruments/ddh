@@ -303,6 +303,14 @@ def exp_get_use_lsb_for_dox_loggers():
     return _get_exp_key_from_cfg('use_lsb_for_dox_loggers')
 
 
+def exp_use_hbw_command():
+    return _get_exp_key_from_cfg('use_hbw_command')
+
+
+def exp_use_aws_cp_track_file():
+    return _get_exp_key_from_cfg('use_aws_cp_track_file')
+
+
 def exp_get_use_ble_passive_scanning():
     return _get_exp_key_from_cfg('use_ble_passive_scanning')
 

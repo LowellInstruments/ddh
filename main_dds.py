@@ -228,6 +228,7 @@ def main_dds():
         aur = ble_check_antenna_up_n_running(g, h)
         nlc = ble_mat_detect_devices_left_connected_ll()
         if rvi or brr or nlc or (not aur):
+            need_hw_reset = brr or aur or nlc
             if rvi:
                 lg.a("warning: last interaction had BLE error")
             if brr:
@@ -238,7 +239,7 @@ def main_dds():
                 lg.a(f"warning: hci{h} is NOT up and running")
             if nlc:
                 lg.a(f"warning: detected {nlc} devices left connected")
-            if linux_is_rpi():
+            if linux_is_rpi() and need_hw_reset:
                 lg.a("warning: starting hci0 reset")
                 ble_reset_antenna(0)
                 time.sleep(1)

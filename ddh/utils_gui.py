@@ -97,6 +97,7 @@ from utils.ddh_shared import (
     STATE_DDS_PRESSED_BUTTON_1,
     send_ddh_udp_gui,
     STATE_DDS_BOOT_GUI, STATE_DDS_NOTIFY_GPS_STILL_WAITING_BOOT, STATE_DDS_PRESSED_BUTTON_3,
+    STATE_DDS_BLE_LOGGER_NO_NEED_DOWNLOAD,
 )
 from utils.flag_paths import LI_PATH_PLT_ONLY_INSIDE_WATER
 from utils.logs import lg_gui as lg
@@ -810,6 +811,10 @@ def _gui_parse_udp(my_app, s, ip="127.0.0.1"):
     elif f == STATE_DDS_BLE_ERROR_MOANA_PLUGIN:
         ct = "moana plugin needed"
         ci = "moana_plugin.png"
+
+    elif f == STATE_DDS_BLE_LOGGER_NO_NEED_DOWNLOAD:
+        ct = "no data to download"
+        ci = 'no_water_data_dl.png'
 
     elif f == STATE_DDS_BAD_CONF:
         ct = _x(STR_DDS_BAD_CONF)

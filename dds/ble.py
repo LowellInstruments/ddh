@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import os
 import pathlib
@@ -9,11 +10,11 @@ import time
 from tzlocal import get_localzone
 
 from ddh.utils_graph import utils_graph_set_fol_req_file
-from dds.ble_dl_dox import ble_interact_do1_or_do2
+from dds.ble_dl_dox import ble_interact_do1_or_do2, HBWException
 from dds.ble_dl_dox_lsb import ble_interact_dox_lsb
 from dds.ble_dl_moana import ble_interact_moana
 from dds.ble_dl_rn4020 import ble_interact_rn4020
-from dds.ble_dl_tdo import ble_interact_tdo
+from dds.ble_dl_tdo import ble_interact_tdo, HBWExceptionTDO
 from dds.ble_dl_tdo_lsb import ble_interact_tdo_lsb
 from dds.gps_utils import (
     gps_utils_log_position_logger,
@@ -87,7 +88,7 @@ from utils.ddh_shared import (
     STATE_DDS_BLE_NO_ASSIGNED_LOGGERS,
     STATE_DDS_BLE_APP_GPS_ERROR_SPEED,
     STATE_DDS_BLE_ANTENNA,
-    dds_get_flag_file_some_ble_dl,
+    dds_get_flag_file_some_ble_dl, STATE_DDS_BLE_LOGGER_NO_NEED_DOWNLOAD,
 )
 from utils.logs import lg_dds as lg
 
@@ -293,6 +294,13 @@ async def _ble_interact_one_logger(mac, info: str, h, g):
     # update GUI with connection icon
     _u(f"{STATE_DDS_BLE_CONNECTING}/{sn}")
 
+
+    # patch for the dashboard DO2_1234
+    info = info.split('_')[0]
+    if info == 'DO2':
+        info = 'DO-2'
+
+
     # ------------------------
     # DOX logger interaction
     # ------------------------
@@ -305,6 +313,13 @@ async def _ble_interact_one_logger(mac, info: str, h, g):
                                                       g,
                                                       hs,
                                                       uuid_interaction)
+
+        # case no need to download because HBW command
+        if rv == 2:
+            _u(STATE_DDS_BLE_LOGGER_NO_NEED_DOWNLOAD)
+            await asyncio.sleep(5)
+            raise HBWException
+
         notes['gps'] = g
         _crit_error = notes["crit_error"]
         _error_dl = notes["error"]
@@ -336,6 +351,13 @@ async def _ble_interact_one_logger(mac, info: str, h, g):
         else:
             rv, notes = await ble_interact_tdo(mac, info, g,
                                                hs, uuid_interaction)
+
+        # case no need to download because HBW command
+        if rv == 2:
+            _u(STATE_DDS_BLE_LOGGER_NO_NEED_DOWNLOAD)
+            await asyncio.sleep(5)
+            raise HBWExceptionTDO
+
         notes['gps'] = g
         _crit_error = notes["crit_error"]
         _error_dl = notes["error"]
@@ -431,7 +453,15 @@ async def ble_interact_all_loggers(macs_det, macs_mon, g, _h: int, _h_desc):
         # -------------------------------------------------------
         # will YES interact with ONE logger of the scanned ones
         # -------------------------------------------------------
-        return await _ble_interact_one_logger(mac, model, _h, g)
+        try:
+            return await _ble_interact_one_logger(mac, model, _h, g)
+        except (HBWException, HBWExceptionTDO):
+            # when no need to download the logger
+            m = mac.lower()
+            rm_mac_orange(m)
+            rm_mac_black(m)
+            add_mac_black(m)
+            return 0
 
 
 def ble_show_monitored_macs():

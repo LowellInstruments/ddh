@@ -21,7 +21,7 @@ from utils.ddh_config import (
     ddh_get_cfg_gear_type,
     dds_get_cfg_logger_sn_from_mac,
     dds_get_cfg_flag_download_test_mode,
-    exp_get_ble_do_crc, ddh_get_folder_path_scripts
+    exp_get_ble_do_crc, ddh_get_folder_path_scripts, exp_use_hbw_command
 )
 from utils.ddh_shared import (
     send_ddh_udp_gui as _u,
@@ -29,7 +29,7 @@ from utils.ddh_shared import (
     STATE_DDS_BLE_DOWNLOAD_ERROR_TP_SENSOR,
     BLEAppException, ael, get_ddh_do_not_rerun_flag_li,
     TESTMODE_FILENAME_PREFIX, STATE_DDS_BLE_DOWNLOAD_PROGRESS,
-    STATE_DDS_BLE_LOW_BATTERY
+    STATE_DDS_BLE_LOW_BATTERY, ddh_get_hbw_flag_file_template
 )
 from utils.logs import lg_dds as lg
 from utils.ddh_shared import (
@@ -40,7 +40,12 @@ from utils.ddh_shared import (
 
 g_debug_not_delete_files = False
 BAT_FACTOR_TDO = 0.5454
-MINIMUM_VERSION_TO_USER_SUPER_CMD = '4.4.00'
+MINIMUM_VERSION_TO_USER_SUPER_CMD = '9.4.00'
+MIN_VERSION_HBW_CMD = "4.2.21"
+
+
+class HBWExceptionTDO(Exception):
+    pass
 
 
 def _une(rv, notes, e, ce=0):
@@ -252,6 +257,25 @@ class BleTDODownload:
         _rae(rv, "sts")
         lg.a(f"STS | logger was {state}")
 
+        # feature has-logger-been-in-water
+        flag_ignore_hbw = ddh_get_hbw_flag_file_template().format(mac)
+        if state == 'running':
+            if exp_use_hbw_command() == 1 and v >= MIN_VERSION_HBW_CMD:
+                lg.a('sending command Has-Been-in-Water')
+                rv, v = await lc.cmd_hbw()
+                lg.a(f"HBW | {v}")
+                if os.path.exists(flag_ignore_hbw):
+                    os.unlink(flag_ignore_hbw)
+                    lg.a('file flag to ignore HBW exists, force download it')
+                else:
+                    if v == 0:
+                        lg.a('logger has NOT been in water, no need to download it')
+                        await lc.disconnect()
+                        raise HBWExceptionTDO()
+                    lg.a("logger has been in water, let's download it")
+        else:
+            lg.a('logger NOT running, not considering HBW command')
+
         rv = await lc.cmd_sws(g)
         _rae(rv, "sws")
         lg.a("SWS | OK")
@@ -430,6 +454,9 @@ async def ble_interact_tdo(mac, info, g, h, u):
     try:
         lg.a(f"debug: interacting {info} logger, mac {mac}")
         rv = await BleTDODownload.download_tdo_logger(lc, mac, g, notes, u)
+
+    except HBWExceptionTDO:
+        rv = 2
 
     except Exception as ex:
         await lc.disconnect()

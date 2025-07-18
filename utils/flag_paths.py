@@ -40,7 +40,8 @@ TMP_PATH_DDH_APP_OVERRIDE = "/tmp/ddh_app_override_file.flag"
 TMP_PATH_INET_VIA = '/tmp/ddh_internet_via.json'
 # indicate something was downloaded via bluetooth
 TMP_PATH_BLE_SOMETHING_DL = "/tmp/dds_something_dl_ble.flag"
-
+# indicates we will download not depending on the mac has been in water or not
+TMP_PATH_DDH_HBW = '/tmp/dds_hbw_{}.flag'
 
 # -----------------------------------------------------------------
 # files stored in /li folder so permanent even removing DDH folder

@@ -21,7 +21,7 @@ from utils.ddh_config import (
     dds_get_cfg_logger_sn_from_mac,
     dds_get_cfg_flag_download_test_mode,
     ddh_get_cfg_gear_type,
-    exp_get_conf_dox
+    exp_get_conf_dox, exp_use_hbw_command
 )
 from utils.ddh_shared import (
     send_ddh_udp_gui as _u,
@@ -31,7 +31,7 @@ from utils.ddh_shared import (
     BLEAppException,
     ael,
     get_ddh_do_not_rerun_flag_li,
-    TESTMODE_FILENAME_PREFIX,
+    TESTMODE_FILENAME_PREFIX, ddh_get_hbw_flag_file_template,
 )
 from utils.logs import lg_dds as lg
 from utils.ddh_shared import (
@@ -43,6 +43,7 @@ import json
 
 MC_FILE = "MAT.cfg"
 BAT_FACTOR_DOT = 0.4545
+MIN_VERSION_HBW_CMD = "4.2.21"
 
 
 def _une(rv, notes, e, ce=0):
@@ -56,6 +57,10 @@ def _une(rv, notes, e, ce=0):
 def _rae(rv, s):
     if rv:
         raise BLEAppException("cc26x2 interact " + s)
+
+
+class HBWException(Exception):
+    pass
 
 
 class BleCC26X2Download:
@@ -77,6 +82,34 @@ class BleCC26X2Download:
             await lc.cmd_rst()
             # out of here for sure
             raise BLEAppException("cc26x2 interact logger reset file")
+
+        rv, v = await lc.cmd_gfv()
+        _rae(rv, "gfv")
+        lg.a(f"GFV | {v}")
+        notes['gfv'] = v
+
+
+        rv, v = await lc.cmd_sts()
+        _rae(rv, 'sts')
+
+        # feature has-logger-been-in-water
+        flag_ignore_hbw = ddh_get_hbw_flag_file_template().format(mac)
+        if v == 'running':
+            if exp_use_hbw_command() == 1 and v >= MIN_VERSION_HBW_CMD:
+                lg.a('sending command Has-Been-in-Water')
+                rv, v = await lc.cmd_hbw()
+                lg.a(f"HBW | {v}")
+                if os.path.exists(flag_ignore_hbw):
+                    os.unlink(flag_ignore_hbw)
+                    lg.a('file flag to ignore HBW exists, force download it')
+                else:
+                    if v == 0:
+                        lg.a('logger has NOT been in water, no need to download it')
+                        await lc.disconnect()
+                        raise HBWException()
+                    lg.a("logger has been in water, let's download it")
+        else:
+            lg.a('logger NOT running, not considering HBW command')
 
         # to know if this DO-X logger uses LID or LIX files
         rv = await lc.cmd_xod()
@@ -106,11 +139,6 @@ class BleCC26X2Download:
             _u(f"{STATE_DDS_BLE_LOW_BATTERY}/{mac}")
             # give time to GUI to display
             await asyncio.sleep(5)
-
-        rv, v = await lc.cmd_gfv()
-        _rae(rv, "gfv")
-        lg.a(f"GFV | {v}")
-        notes['gfv'] = v
 
         rv, v = await lc.cmd_gtm()
         _rae(rv, "gtm")
@@ -281,6 +309,9 @@ async def ble_interact_do1_or_do2(mac, info, g, h, u):
                                                      g,
                                                      notes,
                                                      u)
+
+    except HBWException:
+        rv = 2
 
     except Exception as ex:
         await lc.disconnect()

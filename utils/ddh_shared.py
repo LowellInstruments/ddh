@@ -14,7 +14,8 @@ import toml
 
 from utils.flag_paths import TMP_PATH_GUI_CLOSED_FLAG, TMP_PATH_DISABLE_BLE, TMP_PATH_AWS_HAS_WORK_VIA_GUI, \
     TMP_PATH_DDH_GOT_UPDATE, TMP_PATH_DDH_APP_OVERRIDE, LI_PATH_GPS_DUMMY, \
-    TMP_PATH_CNV_REQUESTED_VIA_GUI, LI_PATH_DDH_VERSION, LI_PATH_PLT_ONLY_INSIDE_WATER, TMP_PATH_BLE_SOMETHING_DL
+    TMP_PATH_CNV_REQUESTED_VIA_GUI, LI_PATH_DDH_VERSION, LI_PATH_PLT_ONLY_INSIDE_WATER, TMP_PATH_BLE_SOMETHING_DL, \
+    TMP_PATH_DDH_HBW
 
 TESTMODE_FILENAME_PREFIX = 'testfile_'
 
@@ -53,6 +54,7 @@ STATE_DDS_BLE_NO_ASSIGNED_LOGGERS = "state_dds_ble_no_assigned_loggers"
 STATE_DDS_BLE_ERROR_MOANA_PLUGIN = "state_dds_ble_error_moana_plugin"
 STATE_DDS_BLE_ERROR_RUN = "state_dds_ble_error_run"
 STATE_DDS_BLE_CONNECTING = 'state_dds_ble_connecting'
+STATE_DDS_BLE_LOGGER_NO_NEED_DOWNLOAD = 'state_dds_ble_logger_no_need_download'
 
 
 STATE_DDS_PRESSED_BUTTON_1 = 'state_dds_pressed_button1'
@@ -200,6 +202,13 @@ def ddh_get_app_override_flag_file() -> str:
     # to force at least one execution even with
     # boat not moving on haul mode
     return TMP_PATH_DDH_APP_OVERRIDE
+
+
+def ddh_get_hbw_flag_file_template() -> str:
+    # set this with the clear-lockout physical button
+    # to force at least one execution even when logger has not been in water
+    # boat not moving on haul mode
+    return TMP_PATH_DDH_HBW
 
 
 def dds_get_ddh_got_an_update_flag_file() -> str:

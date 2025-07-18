@@ -62,7 +62,7 @@ from utils.ddh_config import (
     cfg_save_to_file,
     dds_get_cfg_monitored_pairs,
     ddh_get_cfg_maps_en,
-    ddh_get_folder_path_scripts)
+    ddh_get_folder_path_scripts, dds_get_cfg_monitored_macs)
 from utils.ddh_shared import (
     get_ddh_folder_path_dl_files,
     ddh_get_gui_closed_flag_file,
@@ -84,7 +84,7 @@ from utils.ddh_shared import (
     dds_get_cnv_requested_via_gui_flag_file,
     NAME_EXE_API,
     ddh_get_folder_path_res,
-    get_html_file_no_trawl
+    get_html_file_no_trawl, ddh_get_hbw_flag_file_template
 )
 from utils.logs import lg_gui as lg  # noqa: E402
 import subprocess as sp  # noqa: E402
@@ -438,6 +438,16 @@ class DDH(QMainWindow, d_m.Ui_MainWindow):
         gui_hide_note_tab(self)
         self.tabs.setCurrentIndex(0)
 
+        # for forcing HBW command to work
+        self._create_hbw_flags()
+
+    @staticmethod
+    def _create_hbw_flags():
+        for m in dds_get_cfg_monitored_macs():
+            path = ddh_get_hbw_flag_file_template().format(m)
+            # path: /tmp/dds_hbw_d0:2e:ab:d9:30:66.flag
+            pathlib.Path(path).touch()
+
     def click_btn_note_yes(self):
         s = self.lbl_note.text()
 
@@ -462,6 +472,9 @@ class DDH(QMainWindow, d_m.Ui_MainWindow):
         lg.a("BLE op conditions override set as 1")
         gui_hide_note_tab(self)
         self.tabs.setCurrentIndex(0)
+
+        # for forcing HBW command to work
+        self._create_hbw_flags()
 
     def click_btn_note_no(self):
         gui_hide_note_tab(self)

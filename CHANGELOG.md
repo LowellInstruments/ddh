@@ -500,4 +500,10 @@
 
 4.1.06  07/17/25
 
+    error: smart lock-out NOT done properly
+
+4.1.07  07/18/25
+
     smart lock-out done properly
+    added been-in-water commands and config flag
+    added aws_cp_track_file config flag

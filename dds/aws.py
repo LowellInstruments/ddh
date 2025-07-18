@@ -29,7 +29,7 @@ from mat.utils import linux_is_rpi
 from utils.ddh_config import (
     dds_get_cfg_vessel_name,
     dds_get_cfg_aws_en,
-    dds_get_cfg_aws_credential
+    dds_get_cfg_aws_credential, exp_use_aws_cp_track_file
 )
 from utils.ddh_shared import (
     send_ddh_udp_gui as _u,
@@ -521,27 +521,6 @@ def _aws_sync_or_cp():
         annotate_time_this_occurred(k, period_aws_cp_secs)
         return
 
-    # # also do sync once a day to fix track files uploads issue
-    # if is_it_time_to('periodic_aws_sync', 86400):
-    #     global g_skip_first_aws_periodic_sync
-    #     if g_skip_first_aws_periodic_sync == 0:
-    #         lg.a("doing S3 sync periodically")
-    #
-    #         # we will try enough
-    #         if os.path.exists(flag_dl):
-    #             os.unlink(flag_dl)
-    #
-    #         # sync and rebuild database assuming went ok
-    #         aws_sync()
-    #         aws_cp_init()
-    #         annotate_time_this_occurred(k, period_aws_cp_secs)
-    #
-    #     else:
-    #         lg.a("skipping first S3 periodic sync")
-    #
-    #     g_skip_first_aws_periodic_sync = 0
-    #     return
-
     # upload upon newly downloaded BLE files
     if os.path.exists(flag_dl):
         lg.a(f'doing S3 copy session, detected flag BLE download')
@@ -549,7 +528,8 @@ def _aws_sync_or_cp():
         aws_cp()
         annotate_time_this_occurred(k, period_aws_cp_secs)
         # fix track files uploads issue
-        # _aws_cp_track_file()
+        if exp_use_aws_cp_track_file() == 1:
+            _aws_cp_track_file()
         return
 
     # check enough time passed since last AWS copy
