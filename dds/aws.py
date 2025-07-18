@@ -360,7 +360,7 @@ def _aws_cp_track_file():
     if _k is None or _s is None or _n is None:
         lg.a("warning: missing credentials to AWS cp track file")
         _u(STATE_DDS_NOTIFY_CLOUD_LOGIN)
-        sys.exit(1)
+        return 1
 
     if not _n.startswith("bkt-"):
         lg.a('warning: bucket name does not start with bkt-')
@@ -397,7 +397,7 @@ def _aws_cp_track_file():
         # error copying
         # _u(STATE_DDS_NOTIFY_CLOUD_ERR)
         lg.a(f"error: {rv.stderr}")
-        sys.exit(2)
+        return 2
 
     # add to database as file copied
     # aws_cp_add_to_db_file(path, os.path.getsize(path))
@@ -408,7 +408,6 @@ def _aws_cp_track_file():
 
     # this AWS cp is a separate process, we can exit here
     # _u(STATE_DDS_NOTIFY_CLOUD_OK)
-    sys.exit(0)
 
 
 def aws_cp():
