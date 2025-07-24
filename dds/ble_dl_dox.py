@@ -139,6 +139,10 @@ class BleCC26X2Download:
             _u(f"{STATE_DDS_BLE_LOW_BATTERY}/{mac}")
             # give time to GUI to display
             await asyncio.sleep(5)
+            rv_bad_bat = 1
+            _une(rv_bad_bat, notes, "BAT_low_error", ce=1)
+            lg.a(f'BAT | error {rv_bad_bat}')
+            _rae(rv_bad_bat, "bat")
 
         rv, v = await lc.cmd_gtm()
         _rae(rv, "gtm")

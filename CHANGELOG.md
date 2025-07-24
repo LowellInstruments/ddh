@@ -507,3 +507,7 @@
     smart lock-out done properly
     added been-in-water commands and config flag
     added aws_cp_track_file config flag
+
+4.1.08  07/24/25
+
+    now no retries upon low_bat, directly black list
