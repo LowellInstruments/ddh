@@ -511,3 +511,7 @@
 4.1.08  07/24/25
 
     now no retries upon low_bat, directly black list
+
+4.1.09  08/05/25
+
+    ddc issues option colored green when no issues

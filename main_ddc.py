@@ -485,6 +485,8 @@ def main_ddc():
                     PC.Y(f'\t{v[0]}')
                 elif g_i:
                     PC.B(f'\t{v[0]}')
+                else:
+                    PC.G(f'\t{v[0]}')
 
             # normal entry
             else:
