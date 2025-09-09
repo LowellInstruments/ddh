@@ -80,14 +80,14 @@ async def deploy_logger_tdo(mac, sn, cfg_from_menu):
         print("\t\tBAT | {} mV".format(b))
 
         
-        # check sensor Temperature
-        rv, v = await lc.cmd_gst()
+        # check sensor Temperature, rv: (0, 46741) 
+        rv = await lc.cmd_gst()
         bad_rv = not rv or rv[0] == 1 or rv[1] == 0xFFFF or rv[1] == 0
         _e(bad_rv, 'gst')
 
 
-        # check sensor Pressure
-        rv, v = await lc.cmd_gsp()
+        # check sensor Pressure, rv: (0, 46741)
+        rv = await lc.cmd_gst()
         bad_rv = not rv or rv[0] == 1 or rv[1] == 0xFFFF or rv[1] == 0
         _e(bad_rv, 'gsp')
 
