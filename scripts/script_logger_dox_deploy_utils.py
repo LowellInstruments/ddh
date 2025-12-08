@@ -137,7 +137,7 @@ async def ble_scan_for_dox_loggers(t=5.0):
     _dl = []
 
     def _scan_cb(d: BLEDevice, adv_data):
-        logger_types = ["DO-2", "DO-1"]
+        logger_types = ["DO-2", "DO-1", "DO2"]
         if d.name in logger_types:
             _dd[d.address.lower()] = adv_data.rssi
 
