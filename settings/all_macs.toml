@@ -1,6 +1,8 @@
 # MAC entry example, mind the quotes, do not erase
 # "11:22:33:44:55:66" = "sn1234567"
 # keep this entry, it is the logger we us in our BLE range tool
-"D0:2E:AB:D9:30:1E" = "2121212"
+#"D0:2E:AB:D9:30:1E" = "2121212"
 
 #"F0:5E:CD:25:92:A0" = "2405503"
+"F0:5E:CD:25:A2:3C" = "2512656"
+
