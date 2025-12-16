@@ -186,9 +186,13 @@ def cb_get_gsq():
         print('GPS performing hot reset at start')
         ser_ctl.write(b'AT+QGPSEND\r')
         ser_ctl.write(b'AT+QGPSDEL=1\r')
+        rv = ser_ctl.read(100)
+        print('buffer after GPS end: ', rv)
+        print("clearing buffer and waiting 2 seconds")
+        time.sleep(2)
         ser_ctl.write(b'AT+QGPS=1\r')
         rv = ser_ctl.read(100)
-        print('result: ', rv)
+        print('buffer after GPS restart: ', rv)
 
     except (Exception,) as ex:
         print('ex', ex)
