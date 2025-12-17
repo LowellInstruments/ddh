@@ -515,3 +515,7 @@
 4.1.09  08/05/25
 
     ddc issues option colored green when no issues
+
+4.1.10  12/16/25
+
+    slight version increase to indicate MAT library change and force DDH update
