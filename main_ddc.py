@@ -5,6 +5,7 @@ import time
 from os.path import exists
 import serial
 
+from dds.gps_measure import gps_power_cycle_ddc
 from mat.quectel import detect_quectel_usb_ports
 from scripts.script_ddc import (
     cb_gps_dummy, cb_quit, cb_gps_external, cb_crontab_ddh,
@@ -180,24 +181,28 @@ def cb_get_gsq():
         return
     p_gps, p_ctl = ls_ports_gps_ctl
 
+
+    # let the user decide
+    print('\nQUESTION: Do you want to power-cycle GPS shield? (y/n) -> ', end='')
+    question = input().lower()
+    if question in ('y', 'yes'):
+        gps_power_cycle_ddc(p_ctl)
+
+
     # open 2 ports
     os.system('clear')
     ser = serial.Serial(p_gps, 115200, timeout=.1)
     ser_ctl = serial.Serial(p_ctl, 115200, timeout=1)
 
-    # perform a reset at start on port GPS control
+    # ensure GPS output is activated
     try:
-        print('GPS performing hot reset at start')
         ser_ctl.write(b'AT+QGPSEND\r')
         ser_ctl.write(b'AT+QGPSDEL=1\r')
-        rv = ser_ctl.read(100)
-        print('buffer after GPS end: ', rv)
-        print("clearing buffer and waiting 2 seconds")
-        time.sleep(2)
+        ser_ctl.read_all()
         ser_ctl.write(b'AT+QGPS=1\r')
-        rv = ser_ctl.read(100)
-        print('buffer after GPS restart: ', rv)
-        time.sleep(3)
+        ser_ctl.read_all()
+        ser_ctl.reset_input_buffer()
+        time.sleep(1)
 
     except (Exception,) as ex:
         print('ex', ex)

@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 import re
 import time
 import serial
@@ -278,20 +279,50 @@ def _gps_read():
     return b
 
 
-def _gps_power_cycle():
-    _u(STATE_DDS_GPS_POWER_CYCLE)
-    t = 75
-    lg.a(f"=== warning: power-cycling hat, wait ~{t} seconds ===")
 
-    # GPIO26 controls the sixfab hat power rail
-    # on() means high-level, shutdowns power to hat
-    # off() means low-level, restores power to hat
-    _pin = LED(26)
-    _pin.on()
-    time.sleep(5)
-    _pin.off()
-    time.sleep(t)
-    lg.a("=== warning: power-cycling done, hat should be ON by now ===")
+def _gps_power_cycle(p_ctl):
+
+    # this does not work on shields who do not have GPIO wired
+    # --------------------------------------------------------
+    # _u(STATE_DDS_GPS_POWER_CYCLE)
+    # t = 75
+    # lg.a(f"=== warning: power-cycling hat, wait ~{t} seconds ===")
+    #
+    # # GPIO26 controls the sixfab hat power rail
+    # # on() means high-level, shutdowns power to hat
+    # # off() means low-level, restores power to hat
+    # _pin = LED(26)
+    # _pin.on()
+    # time.sleep(5)
+    # _pin.off()
+    # time.sleep(t)
+    # lg.a("=== warning: power-cycling done, hat should be ON by now ===")
+
+
+    # we came up with this fix, which we also use in DDC
+    gps_power_cycle_ddc(p_ctl)
+
+
+
+
+def gps_power_cycle_ddc(p_ctl):
+    _u(STATE_DDS_GPS_POWER_CYCLE)
+    t = 30
+
+    ser_ctl = serial.Serial(p_ctl, 115200, timeout=1)
+
+    try:
+        lg.a(f"=== warning: power-cycling hat, wait ~{t} seconds ===")
+        ser_ctl.write(b'AT+QPOWD=0\r')
+        if ser_ctl and ser_ctl.is_open:
+            ser_ctl.close()
+        time.sleep(30)
+        lg.a("=== warning: power-cycling done, hat should be ON by now ===")
+    except (Exception,) as ex:
+        print('ex gps_power_cycle_2 ->', ex)
+
+
+
 
 
 def _gps_measure():
@@ -334,12 +365,12 @@ def _gps_measure():
             b = _gps_read()
 
             # detect no output or strange thing with Linux USB ports
-            if not b or (b'CPIN' in b):
+            if not b or (b'CPIN' in b) or os.path.exists('/tmp/.ddh_power_cycle_test'):
                 lg.a('error: bad GPS issue -> b = ', b)
                 if is_it_time_to("gps_power_cycle", PERIOD_GPS_POWER_CYCLE):
                     notify_ddh_error_hw_gps()
                     lg.a(f'warning: power-cycling GPS')
-                    _gps_power_cycle()
+                    _gps_power_cycle(_g_pu_ctl)
                     _g_pu_gps, _g_pu_ctl = detect_quectel_usb_ports()
                 return
 
@@ -357,7 +388,7 @@ def _gps_measure():
             if is_it_time_to("gps_power_cycle_bad_port", PERIOD_GPS_POWER_CYCLE_BAD_PORT):
                 lg.a(f'warning: power-cycling GPS because could not open port')
                 notify_ddh_error_hw_gps()
-                _gps_power_cycle()
+                _gps_power_cycle(_g_pu_ctl)
                 _g_pu_gps, _g_pu_ctl = detect_quectel_usb_ports()
                 return
 

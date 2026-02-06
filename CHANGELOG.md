@@ -523,3 +523,7 @@
 4.1.11  02/06/26
 
     better version DDC 'g' command
+
+4.1.12  02/06/26
+
+    added a new way to power cycle DDH
