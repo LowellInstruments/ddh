@@ -347,6 +347,17 @@ def _gps_measure():
         lon = "{:+.6f}".format(fgp[1])
         return lat, lon, datetime.datetime.utcnow(), 1
 
+
+    # power cycling test
+    # if os.path.exists('/tmp/.ddh_power_cycle_test'):
+    #     os.unlink('/tmp/.ddh_power_cycle_test')
+    #     lg.a("warning: Joaquim power cycle test")
+    #     _g_pu_gps, _g_pu_ctl = detect_quectel_usb_ports()
+    #     _gps_power_cycle(_g_pu_ctl)
+    #     _g_pu_gps, _g_pu_ctl = detect_quectel_usb_ports()
+    #     return
+
+
     # GPS state machine
     global _g_pu_gps
     global _g_pu_ctl
@@ -365,7 +376,7 @@ def _gps_measure():
             b = _gps_read()
 
             # detect no output or strange thing with Linux USB ports
-            if not b or (b'CPIN' in b) or os.path.exists('/tmp/.ddh_power_cycle_test'):
+            if not b or (b'CPIN' in b):
                 lg.a('error: bad GPS issue -> b = ', b)
                 if is_it_time_to("gps_power_cycle", PERIOD_GPS_POWER_CYCLE):
                     notify_ddh_error_hw_gps()
