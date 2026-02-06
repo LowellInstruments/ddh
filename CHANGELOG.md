@@ -519,3 +519,7 @@
 4.1.10  12/16/25
 
     slight version increase to indicate MAT library change and force DDH update
+
+4.1.11  02/06/26
+
+    better version DDC 'g' command

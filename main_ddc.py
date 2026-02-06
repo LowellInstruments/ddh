@@ -26,12 +26,14 @@ from utils.flag_paths import (
 import subprocess as sp
 from mat.utils import PrintColors as PC
 
+
 # cwd() is ddh folder here
 h = str(pathlib.Path.home())
 p = 'li/ddh' if is_rpi() else 'PycharmProjects/ddh'
 path_script_deploy_dox = f'{h}/{p}/scripts/run_script_deploy_logger_dox.sh'
 path_script_deploy_tdo = f'{h}/{p}/scripts/run_script_deploy_logger_tdo.sh'
 path_script_scan_li = f'{h}/{p}/scripts/run_script_scan_li.sh'
+
 
 # variables for errors and warnings
 g_e = None
