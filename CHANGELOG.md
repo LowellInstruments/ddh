@@ -527,3 +527,4 @@
 4.1.12  02/06/26
 
     added a new way to power cycle DDH
+    made the message "will not interact w/ loggers" appear less often for smaller log files

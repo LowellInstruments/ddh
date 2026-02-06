@@ -94,7 +94,8 @@ def gps_utils_parse_errors(g) -> int:
 
     # detect errors in GPS frame
     if not g:
-        lg.a("error: no GPS frame, will not interact w/ loggers")
+        if is_it_time_to("tell_no_gps_frame_will_not_interact_logger", 60):
+            lg.a("error: no GPS frame, will not interact w/ loggers")
         return 1
 
     lat, lon, tg, speed = g
