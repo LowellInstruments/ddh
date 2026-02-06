@@ -170,18 +170,20 @@ def cb_get_csq():
 
 
 def cb_get_gsq():
-    rv = detect_quectel_usb_ports()
-    if not rv:
+    # get the USB ports
+    ls_ports_gps_ctl = detect_quectel_usb_ports()
+    if not ls_ports_gps_ctl:
         _p_e('could not detect quectel USB ports for CSQ')
         time.sleep(2)
         return
-    p_gps, p_ctl = rv
+    p_gps, p_ctl = ls_ports_gps_ctl
 
+    # open 2 ports
     os.system('clear')
     ser = serial.Serial(p_gps, 115200, timeout=.1)
     ser_ctl = serial.Serial(p_ctl, 115200, timeout=1)
 
-    # perform a reset at start
+    # perform a reset at start on port GPS control
     try:
         print('GPS performing hot reset at start')
         ser_ctl.write(b'AT+QGPSEND\r')
@@ -193,43 +195,38 @@ def cb_get_gsq():
         ser_ctl.write(b'AT+QGPS=1\r')
         rv = ser_ctl.read(100)
         print('buffer after GPS restart: ', rv)
+        time.sleep(3)
 
     except (Exception,) as ex:
         print('ex', ex)
 
-    time.sleep(3)
-
     # starts GPS signal quality loop
-    print('GPS quality test, running')
-    last_lat_lon = ''
-    last_time = ''
-    dt = {}
     while 1:
-        bb = bytes()
-        we_have_line = 0
 
-        # get one GPS frame
-        till_read = time.perf_counter() + 2
-        while time.perf_counter() < till_read:
-            b = ser.read()
-            bb += b
-            if b == b'\n':
-                we_have_line = 1
-                break
+        # get a lot of GPS bytes
+        os.system('clear')
+        print('GPS quality test runnin, please wait some seconds\n')
+        bb = ser.read_all()
+        ser.reset_input_buffer()
 
-        # not valid
-        if we_have_line == 0:
-            continue
-        if len(bb) < 20:
-            continue
+        # we only keep GPRMC / GPGSV lines
+        ls_gps = bb.split(b'\r\n')
+        ls_rmc = [i for i in ls_gps if i and i.startswith(b'$GPRMC') and i[-3] == 42]
+        ls_gsv = [i for i in ls_gps if i and i.startswith(b'$GPGSV') and i[-3] == 42]
+        line_rmc = ''
+        if ls_rmc:
+            line_rmc = ls_rmc[-1].decode()
+        print(ls_rmc)
+        print(ls_gsv)
 
-        # we only want GPGSV lines
-        line = bb.decode()
-        if not line.startswith('$GPGSV') and not line.startswith('$GPRMC'):
-            continue
-
-        if line.startswith('$GPRMC'):
-            g = line.split(',')
+        # parse line GPRMC
+        s = '\n'
+        last_lat_lon = ''
+        last_time = ''
+        if not line_rmc:
+            s += "RMC --> none\n"
+        else:
+            g = line_rmc.split(',')
             # g: ['$GPRMC', '145557.00', 'A', '4136.603719', 'N', '07036.560277', 'W', ...]
             if g[2] == 'A':
                 def toDD(s):
@@ -239,59 +236,54 @@ def cb_get_gsq():
 
                 last_lat_lon = (toDD(g[3]), g[4], toDD(g[5]), g[6])
                 last_time = f'{g[1][0:2]}:{g[1][2:4]}:{g[1][4:6]}'
+                s += f'RMC --> {last_lat_lon}    {last_time}\n'
+            else:
+                s += "RMC --> ,,,,\n"
+
+        print(s, end='')
+        s = ''
 
         # wait for the first frame of the GPGSV set
-        line = line[:line.index('*')]
-        f = line.split(',')
-        tm = f[1]
-        mn = f[2]
-        sv = f[3]
-        if mn == "1":
-            os.system('clear')
-            print(f'time {last_time}  pos {last_lat_lon}')
-            print(f'satellites in view = {sv}')
-
-        # 1    = Total number of messages of this type in this cycle
-        # 2    = Message number
-        # 3    = Total number of SVs in view
-        # 4    = SV PRN number
-        # 5    = Elevation in degrees, 90 maximum
-        # 6    = Azimuth, degrees from true north, 000 to 359
-        # 7    = SNR, 00-99 dB (null when not tracking)
-        # 8-11 = Information about second SV, same as field 4-7
-        # 12-15= Information about third SV, same as field 4-7
-        # 16-19= Information about fourth SV, same as field 4-7
-
         d = {}
-        d[mn] = {}
-        if mn == '1':
-            dt = {}
+        for i in ls_gsv:
+            f = i.decode().split(',')
+            # 1    = Total number of messages of this type in this cycle
+            # 2    = Message number
+            # 3    = Total number of SVs in view
+            # 4    = SV PRN number
+            # 5    = Elevation in degrees, 90 maximum
+            # 6    = Azimuth, degrees from true north, 000 to 359
+            # 7    = SNR, 00-99 dB (null when not tracking)
+            # 8-11 = Information about second SV, same as field 4-7
+            # 12-15= Information about third SV, same as field 4-7
+            # 16-19= Information about fourth SV, same as field 4-7
+            mn = f[2]
+            for j in range(4, 17, 4):
+                try:
+                    s_id = f[j]
+                    s_snr = f[j + 3]
+                    d[s_id] = s_snr
+                except:
+                    pass
 
-        for i in range(4, 17, 4):
-            try:
-                s_id = f[i]
-                s_snr = f[i + 3]
-                d[mn][s_id] = s_snr
-                dt[s_id] = s_snr
-            except:
-                pass
+        n = len(d)
+        if d:
+            # d: {'1': {'04': '26', '05': '35', '06': '34', '09': '32'},
+            #     '2': {'11': '30', '12': '35', '19': '30', '21': '34'},
+            #     '3': {'25': '30', '29': '30', '13': '', '17': ''}}
+            d = {k: v for k, v in d.items() if v}
+            m = len(d)
+            s += f'GSV --> {n} satellites, {n - m} of which reporting no SNR\n'
+            s += '\n[ id ] snr     (max 99)\n'
+            s += '-----------------------\n'
+            for k, v in d.items():
+                s += f'[ {k} ] snr {v} '
+                s += ('#' * int(v)) + '\n'
 
-        # order final dictionary
-        dt = {k: v for k, v in sorted(dt.items(), key=lambda item: item[1], reverse=True)}
-        # print(d)
-        if mn == tm:
-            print('[ id ] snr (max 99)\n')
-            for k, v in dt.items():
-                if not v:
-                    print(f'[ {k} ] na')
-                    continue
-                n = int(v)
-                s = '#' * n
-                print(f'[ {k} ] {v} {s} ')
-            time.sleep(3)
+        print(s)
+        time.sleep(3)
 
-    print('GPS quality test ended, press ENTER to go back to DCC')
-    input()
+
 
 
 def cb_test_buttons():
@@ -473,7 +465,7 @@ def main_ddc():
             'b': (f"b) detect LI loggers around", cb_run_scan_li),
             # 'u': (f"u) list Quectel USB ports", cb_list_quectel_usb_ports),
             's': (f"s) get cell signal quality (beta)", cb_get_csq),
-            'g': (f"g) get GPS  signal quality (beta)", cb_get_gsq),
+            'g': (f"g) get GPS  signal quality", cb_get_gsq),
             'i': (f"i) ~ see issues ~", cb_ddh_show_issues),
             'h': (f"h) help", cb_ddh_show_help),
             'q': (f"q) quit", cb_quit)
