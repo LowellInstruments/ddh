@@ -434,7 +434,7 @@ def _gps_measure():
 
     # number of satellites notification
     global _skip_satellite_notification
-    if 0 < ns <= 5 and is_it_time_to('SQS_gps_num_satellites', PERIOD_GPS_NOTI_NUM_GPS_SAT):
+    if 0 < ns < 5 and is_it_time_to('SQS_gps_num_satellites', PERIOD_GPS_NOTI_NUM_GPS_SAT):
         if _skip_satellite_notification:
             # Nick wanted to skip the first one
             _skip_satellite_notification = 0
