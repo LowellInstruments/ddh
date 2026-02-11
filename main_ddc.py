@@ -197,8 +197,6 @@ def cb_get_gsq():
     # ensure GPS output is activated, this code is same as gps_power_cycle()
     try:
         print('trying to reactivate GPS')
-        ser_ctl = serial.Serial(p_ctl, 115200, timeout=1)
-        print('now')
         ser_ctl.write(b'AT+QGPSEND\r')
         time.sleep(.1)
         rv = ser_ctl.read_all()
