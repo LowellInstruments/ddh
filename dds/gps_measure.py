@@ -309,16 +309,13 @@ def gps_power_cycle_ddc(p_ctl):
     _u(STATE_DDS_GPS_POWER_CYCLE)
     t = 30
 
+    ser_ctl = None
     try:
         ser_ctl = serial.Serial(p_ctl, 115200, timeout=1)
         lg.a(f"=== warning: power-cycling hat, wait ~{t} seconds ===")
         ser_ctl.write(b'AT+QPOWD=0\r')
-        if ser_ctl and ser_ctl.is_open:
-            ser_ctl.close()
         time.sleep(30)
         lg.a("=== warning: power-cycling done, hat should be ON by now ===")
-        if ser_ctl and ser_ctl.is_open:
-            ser_ctl.close()
     except (Exception,) as ex:
         print('ex gps_power_cycle_ddc_1 ->', ex)
     finally:
@@ -343,10 +340,8 @@ def gps_power_cycle_ddc(p_ctl):
         print(rv)
         ser_ctl.reset_input_buffer()
         time.sleep(1)
-        if ser_ctl and ser_ctl.is_open:
-            ser_ctl.close()
     except (Exception, ) as ex:
-        print(f'error: gps_power_cycle_ddc {ex}')
+        print(f'error: gps_power_cycle_ddc_2 {ex}')
     finally:
         if ser_ctl and ser_ctl.is_open:
             ser_ctl.close()
