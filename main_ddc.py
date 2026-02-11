@@ -194,25 +194,37 @@ def cb_get_gsq():
     ser = serial.Serial(p_gps, 115200, timeout=.1)
     ser_ctl = serial.Serial(p_ctl, 115200, timeout=1)
 
-    # ensure GPS output is activated
+    # ensure GPS output is activated, this code is same as gps_power_cycle()
     try:
+        print('trying to reactivate GPS')
+        ser_ctl = serial.Serial(p_ctl, 115200, timeout=1)
+        print('now')
         ser_ctl.write(b'AT+QGPSEND\r')
+        time.sleep(.1)
+        rv = ser_ctl.read_all()
+        print(rv)
         ser_ctl.write(b'AT+QGPSDEL=1\r')
-        ser_ctl.read_all()
+        time.sleep(.1)
+        rv = ser_ctl.read_all()
+        print(rv)
         ser_ctl.write(b'AT+QGPS=1\r')
-        ser_ctl.read_all()
+        time.sleep(.1)
+        rv = ser_ctl.read_all()
+        print(rv)
         ser_ctl.reset_input_buffer()
         time.sleep(1)
-
-    except (Exception,) as ex:
-        print('ex', ex)
+    except (Exception, ) as ex:
+        print(f'error: gps_power_cycle_ddc {ex}')
+    finally:
+        if ser_ctl and ser_ctl.is_open:
+            ser_ctl.close()
 
     # starts GPS signal quality loop
     while 1:
 
         # get a lot of GPS bytes
         os.system('clear')
-        print('GPS quality test runnin, please wait some seconds\n')
+        print('GPS quality test running, please wait some seconds\n')
         bb = ser.read_all()
         ser.reset_input_buffer()
 
