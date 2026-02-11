@@ -528,3 +528,8 @@
 
     added a new way to power cycle DDH
     made the message "will not interact w/ loggers" appear less often for smaller log files
+
+4.1.13  02/11/26
+
+    added better power_cycle with GPS activation
+
