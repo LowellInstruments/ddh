@@ -533,3 +533,8 @@
 
     added better power_cycle with GPS activation
 
+4.1.14  02/12/26
+
+    analyzing hypoxia alerts
+
+
