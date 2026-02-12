@@ -129,6 +129,7 @@ def _ble_detect_hypoxia_after_download(f_lid, bat, g, u=''):
             for i in ll[1:]:
                 do_mg_l = float(i.split(',')[3])
                 if do_mg_l <= 0.0:
+                    lg.a(f"warning: sending HYPOXIA notification for file {f_csv}")
                     notify_logger_dox_hypoxia(g, ln)
                     break
     except (Exception, ) as ex:
