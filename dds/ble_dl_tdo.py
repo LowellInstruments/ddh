@@ -386,7 +386,7 @@ class BleTDODownload:
                 gpq_create_fixed_mode_file(g, name)
 
         # format file-system
-        await asyncio.sleep(.1)
+        await asyncio.sleep(.5)
         rv = await lc.cmd_frm()
         _rae(rv, "frm")
         lg.a("FRM | OK")
