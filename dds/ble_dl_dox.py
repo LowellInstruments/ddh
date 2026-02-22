@@ -216,7 +216,7 @@ class BleCC26X2Download:
                 gpq_create_fixed_mode_file(g, name)
 
         # format file-system, o/w DO-1 loggers (NAND mem) get slower
-        await asyncio.sleep(.1)
+        await asyncio.sleep(.5)
         rv = await lc.cmd_frm()
         _rae(rv, "frm")
         lg.a("FRM | OK")
