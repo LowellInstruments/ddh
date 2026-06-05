@@ -44,6 +44,10 @@ _g_ts_cached_gps_valid_for = 0
 _g_cached_gps = None
 _g_banner_cache_too_old = 0
 _skip_satellite_notification = 1
+g_hat_err_gps_bad = 0
+g_hat_err_gps_port = 0
+g_hat_err_gps_count = 0
+
 
 
 # pu_gps: port USB gps for Quectel shields
@@ -387,6 +391,29 @@ def _gps_measure():
     global _g_pu_ctl
     g = None
     ns = -1
+
+
+    # ------------------------------
+    # see if we need a HAT recovery
+    # ------------------------------
+    global g_hat_err_gps_bad
+    global g_hat_err_gps_port
+    global g_hat_err_gps_count
+    if g_hat_err_gps_bad or g_hat_err_gps_port:
+        lg.a(f'warning: power-cycling GPS, '
+             f'bad_frame = {g_hat_err_gps_bad}, bad_port {g_hat_err_gps_port}')
+        g_hat_err_gps_bad = 0
+        g_hat_err_gps_port = 0
+        g_hat_err_gps_count += 1
+        if g_hat_err_gps_count == 10:
+            notify_ddh_error_hw_gps()
+            g_hat_err_gps_count = 0
+        _gps_power_cycle(_g_pu_ctl)
+        _g_pu_gps, _g_pu_ctl = detect_quectel_usb_ports()
+        _activate_gps_output()
+
+
+
     try:
         b = _gps_read()
 
@@ -403,11 +430,8 @@ def _gps_measure():
             if not b or (b'CPIN' in b):
                 lg.a('error: bad GPS issue -> b = ', b)
                 if is_it_time_to("gps_power_cycle", PERIOD_GPS_POWER_CYCLE):
-                    notify_ddh_error_hw_gps()
-                    lg.a(f'warning: power-cycling GPS')
-                    _gps_power_cycle(_g_pu_ctl)
-                    _g_pu_gps, _g_pu_ctl = detect_quectel_usb_ports()
-                return
+                    g_hat_err_gps_bad = 1
+                return None
 
         # detect RMC and GSV frames
         re_rmc = re.search(b"GPRMC(.*)\r\n", b)
@@ -421,11 +445,8 @@ def _gps_measure():
         lg.a(f'error: gps_measure_inner -> {ex}')
         if 'could not open port' in str(ex):
             if is_it_time_to("gps_power_cycle_bad_port", PERIOD_GPS_POWER_CYCLE_BAD_PORT):
-                lg.a(f'warning: power-cycling GPS because could not open port')
-                notify_ddh_error_hw_gps()
-                _gps_power_cycle(_g_pu_ctl)
-                _g_pu_gps, _g_pu_ctl = detect_quectel_usb_ports()
-                return
+                g_hat_err_gps_port = 1
+                return None
 
     # GPS caches
     global _g_ts_cached_gps_valid_for
@@ -442,6 +463,7 @@ def _gps_measure():
 
     # OK frame
     if g:
+        g_hat_err_gps_count = 0
         g = list(g)
         lat = "{:+.6f}".format(g[0])
         lon = "{:+.6f}".format(g[1])
