@@ -97,6 +97,46 @@ from dds.gps_utils import (
 _g_gpw = GpqW()
 
 
+
+
+g_atcom_previous_is_bad = False
+
+def _check_atcom_percentage():
+    global g_atcom_previous_is_bad
+
+    # see current atcom value
+    c = "ps -C atcom -o %cpu | tail -n 1"
+    rv = sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+    atcom_current_is_bad = False
+    try:
+        xc = float(rv.stdout.decode().strip())
+        lg.a(f'warning, atcom is at {xc} %')
+        if xc >= 99:
+            atcom_current_is_bad = True
+    except (Exception,) as ex:
+        lg.a(f'error, atcom stderr {rv.stderr} -> {ex}')
+        g_atcom_previous_is_bad = False
+        return
+
+
+    # we were able to obtain percentage
+    if g_atcom_previous_is_bad and atcom_current_is_bad:
+        if linux_is_rpi():
+            lg.a('warning, doing poff and killall')
+            c = "sudo poff; sudo killall atcom"
+            rv = sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+            if rv.returncode:
+                lg.a('error, when doing poff and killall')
+            g_atcom_previous_is_bad = False
+            return
+
+    g_atcom_previous_is_bad = atcom_current_is_bad
+
+
+
+
+
+
 def main_dds():
 
     rv = dds_check_config_file()
@@ -190,6 +230,11 @@ def main_dds():
 
         # so watchdog does not complain
         dds_feed_watchdog()
+
+
+        if is_it_time_to('check_atcom_percentage', 600):
+            _check_atcom_percentage()
+
 
         # tell GUI
         gps_utils_tell_vessel_name()
