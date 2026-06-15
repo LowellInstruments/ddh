@@ -114,6 +114,7 @@ def _check_atcom_percentage():
         if xc >= 99:
             atcom_current_is_bad = True
     except (Exception,) as ex:
+        # ex: 'could not convert string to float %CPU'
         lg.a(f'error, atcom stderr {rv.stderr} -> {ex}')
         g_atcom_previous_is_bad = False
         return
@@ -122,7 +123,7 @@ def _check_atcom_percentage():
     # we were able to obtain percentage
     if g_atcom_previous_is_bad and atcom_current_is_bad:
         if linux_is_rpi():
-            lg.a('warning, doing poff and killall')
+            lg.a('warning, atcom doing poff and killall')
             c = "sudo poff; sudo killall atcom"
             rv = sp.run(c, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
             if rv.returncode:
