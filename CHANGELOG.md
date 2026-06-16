@@ -537,4 +537,13 @@
 
     analyzing hypoxia alerts
 
+4.1.15  06/14/26
+
+    less often GPS alerts
+
+4.1.16  06/16/26
+
+    atcom percentage bug
+
+
 
