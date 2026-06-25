@@ -115,7 +115,7 @@ def _check_atcom_percentage():
             atcom_current_is_bad = True
     except (Exception,) as ex:
         # ex: 'could not convert string to float %CPU'
-        lg.a(f'error, atcom stderr {rv.stderr} -> {ex}')
+        # lg.a(f'error, atcom stderr {rv.stderr} -> {ex}')
         g_atcom_previous_is_bad = False
         return
 
