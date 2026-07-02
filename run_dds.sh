@@ -92,33 +92,73 @@ source "$FOL_VEN"/bin/activate
 
 
 
-_pb "DDS run main_qus.py to auto-detect Quectel shield USB ports"
-cd "$FOL_DDH" && "$FOL_VEN"/bin/python main_qus.py
-QUC=$(cat /tmp/usb_quectel_ctl)
-
-
-
+#_pb "DDS run main_qus.py to auto-detect Quectel shield USB ports"
+#cd "$FOL_DDH" && "$FOL_VEN"/bin/python main_qus.py
+#QUC=$(cat /tmp/usb_quectel_ctl)
 # detect cell shield SIM ID and write it to file
+#if [ "${QUC}" ]; then
+#    if [ ! -s "$LI_FILE_ICCID" ]; then
+#        # the file is zero
+#        rm "$LI_FILE_ICCID" > /dev/null 2>&1
+#    fi
+#    if [ ! -f "$LI_FILE_ICCID" ]; then
+#        # the file does not exist
+#        for idx_iccid in {1..5}
+#        do
+#            _pb "DDS query Quectel SIM ID on $QUC, attempt #$idx_iccid"
+#            echo -ne "AT+QCCID\r" > "$QUC"
+#            sleep 0.1
+#            timeout 1 cat -v < "$QUC" | grep QCCID > "$LI_FILE_ICCID"
+#            if [ -s "$LI_FILE_ICCID" ]; then
+#                # there is definitely something in the file :)
+#                break
+#            fi
+#        done
+#    fi
+# fi
+
+
+
+_pb "    DDH - run main_qus.py to auto-detect Quectel USB ports"
+cd "$FOL_DDH" && "$FOL_VEN"/bin/python main_qus.py
+
+_pb "    DDH - query ICCID file"
+QUC=$(cat /tmp/usb_quectel_ctl)
 if [ "${QUC}" ]; then
+    # the file size is zero
     if [ ! -s "$LI_FILE_ICCID" ]; then
-        # the file is zero
+          _py "    DDH - ICCID file removed because had size = 0"
         rm "$LI_FILE_ICCID" > /dev/null 2>&1
     fi
-    if [ ! -f "$LI_FILE_ICCID" ]; then
-        # the file does not exist
-        for idx_iccid in {1..5}
+    WC_ID=$(wc -c < "$LI_FILE_ICCID")
+    RV=$?
+    if [[ $RV -ne 0 || $WC_ID -ne 31 ]]; then
+        # the file size is NOT Ok
+        for idx_iccid in {1..10}
         do
-            _pb "DDS query Quectel SIM ID on $QUC, attempt #$idx_iccid"
+            _py "    DDH - query $QUC for ICCID #$idx_iccid"
             echo -ne "AT+QCCID\r" > "$QUC"
             sleep 0.1
             timeout 1 cat -v < "$QUC" | grep QCCID > "$LI_FILE_ICCID"
-            if [ -s "$LI_FILE_ICCID" ]; then
-                # there is definitely something in the file :)
+            WC_ID=$(wc -c < "$LI_FILE_ICCID")
+            RV=$?
+            if [[ $RV -eq 0 && $WC_ID -eq 31 ]]; then
+                _pb "    DDH - ICCID file created OK on attempt #$idx_iccid"
                 break
             fi
         done
+    else
+        _pb "    DDH - ICCID file seems OK from the start"
     fi
 fi
+WC_ID=$(wc -c < "$LI_FILE_ICCID")
+RV=$?
+if [[ $RV -ne 0 || $WC_ID -ne 31 ]]; then
+    _py "    DDH - ICCID file NOT OK"
+fi
+
+
+
 
 
 
