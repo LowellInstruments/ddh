@@ -287,20 +287,12 @@ def _get_exp_key_from_cfg(k):
         return -1
 
 
-def exp_get_use_lsb_for_tdo_loggers():
-    return _get_exp_key_from_cfg('use_lsb_for_tdo_loggers')
-
-
 def exp_get_use_smart_lockout():
     return _get_exp_key_from_cfg('use_smart_lockout')
 
 
 def exp_get_use_new_dds_watchdog():
     return _get_exp_key_from_cfg('use_new_dds_watchdog')
-
-
-def exp_get_use_lsb_for_dox_loggers():
-    return _get_exp_key_from_cfg('use_lsb_for_dox_loggers')
 
 
 def exp_use_hbw_command():

@@ -11,11 +11,9 @@ from tzlocal import get_localzone
 
 from ddh.utils_graph import utils_graph_set_fol_req_file
 from dds.ble_dl_dox import ble_interact_do1_or_do2, HBWException
-from dds.ble_dl_dox_lsb import ble_interact_dox_lsb
 from dds.ble_dl_moana import ble_interact_moana
 from dds.ble_dl_rn4020 import ble_interact_rn4020
 from dds.ble_dl_tdo import ble_interact_tdo, HBWExceptionTDO
-from dds.ble_dl_tdo_lsb import ble_interact_tdo_lsb
 from dds.gps_utils import (
     gps_utils_log_position_logger,
     gps_simulate_boat_speed
@@ -59,8 +57,6 @@ from utils.ddh_config import (
     dds_get_cfg_flag_purge_this_mac_dl_files_folder,
     dds_get_cfg_logger_sn_from_mac,
     dds_get_cfg_logger_mac_from_sn,
-    exp_get_use_lsb_for_tdo_loggers,
-    exp_get_use_lsb_for_dox_loggers,
     dds_get_cfg_monitored_macs,
     ddh_get_cfg_gear_type,
     dds_get_cfg_moving_speed,
@@ -306,14 +302,13 @@ async def _ble_interact_one_logger(mac, info: str, h, g):
     # DOX logger interaction
     # ------------------------
     if _ble_logger_is_do1_or_do2(info):
-        if exp_get_use_lsb_for_dox_loggers() == 1:
-            rv, notes = ble_interact_dox_lsb(mac, info, g, hs, uuid_interaction)
-        else:
-            rv, notes = await ble_interact_do1_or_do2(mac,
-                                                      info,
-                                                      g,
-                                                      hs,
-                                                      uuid_interaction)
+        rv, notes = await ble_interact_do1_or_do2(
+            mac,
+            info,
+            g,
+            hs,
+            uuid_interaction
+        )
 
         # case no need to download because HBW command
         if rv == 2:
@@ -347,11 +342,13 @@ async def _ble_interact_one_logger(mac, info: str, h, g):
     # TDO logger interaction
     # -----------------------
     elif _ble_logger_is_tdo(info):
-        if exp_get_use_lsb_for_tdo_loggers() == 1:
-            rv, notes = ble_interact_tdo_lsb(mac, info, g, hs, uuid_interaction)
-        else:
-            rv, notes = await ble_interact_tdo(mac, info, g,
-                                               hs, uuid_interaction)
+        rv, notes = await ble_interact_tdo(
+            mac,
+            info,
+            g,
+            hs,
+            uuid_interaction
+        )
 
         # case no need to download because HBW command
         if rv == 2:
